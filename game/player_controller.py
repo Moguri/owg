@@ -47,12 +47,8 @@ class PlayerController(DirectObject):
         movement *= self.player_speed
         self.player.set_linear_movement(movement, True)
 
-        # For now force the player above ground
-        pos = self.playernp.get_pos()
-        pos.z = 1
-        self.playernp.set_pos(pos)
-
         # Update the camera
+        pos = self.playernp.get_pos()
         self.camera.set_pos(pos)
         self.camera.set_hpr(self.playernp.get_hpr())
         return task.cont

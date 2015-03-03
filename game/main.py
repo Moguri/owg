@@ -4,7 +4,7 @@ from __future__ import print_function
 import random
 
 from direct.showbase.ShowBase import ShowBase
-from panda3d.bullet import BulletWorld, BulletDebugNode
+import panda3d.bullet as bullet
 import panda3d.core as p3d
 
 from citygen import *
@@ -22,11 +22,11 @@ class GameApp(ShowBase):
         self.input_mapper = inputmapper.InputMapper('input.conf')
         self.disableMouse()
 
-        self.physics_world = BulletWorld()
+        self.physics_world = bullet.BulletWorld()
         self.physics_world.set_gravity(p3d.Vec3(0, 0, -9.81))
         self.taskMgr.add(self.update_physics, 'Update Physics')
 
-        phydebug = BulletDebugNode('Physics Debug')
+        phydebug = bullet.BulletDebugNode('Physics Debug')
         phydebug.show_wireframe(True)
         phydebug.show_bounding_boxes(True)
         phydebugnp = self.render.attach_new_node(phydebug)
@@ -116,6 +116,12 @@ class GameApp(ShowBase):
         color = [c/255.0 for c in (7, 105, 105)]
         road_mat.set_diffuse(p3d.VBase4(color[0], color[1], color[2], 1.0))
         self.create_mesh(city.road_mesh, "road", road_mat)
+
+        node = bullet.BulletRigidBodyNode('Ground')
+        node.add_shape(bullet.BulletPlaneShape(p3d.Vec3(0, 0, 1), 0))
+        self.render.attach_new_node(node)
+        self.physics_world.attach_rigid_body(node)
+
 
     # Tasks
     def update_physics(self, task):
