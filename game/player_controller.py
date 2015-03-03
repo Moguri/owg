@@ -13,7 +13,11 @@ class PlayerController(DirectObject):
         self.mouse_watcher_node = mouse_watcher_node
         self.window = win
 
-        self.window.move_pointer(0, 0, 0)
+        halfx = self.window.get_x_size() / 2
+        halfy = self.window.get_y_size() / 2
+        self.window.move_pointer(0, halfx, halfy)
+
+        self.camera_pitch = 0
 
         self.player_movement = p3d.Vec3(0, 0, 0)
         self.player_speed = 10
@@ -59,9 +63,17 @@ class PlayerController(DirectObject):
             self.window.move_pointer(0, halfx, halfy)
             self.player.set_angular_movement(-mouse.x * 1000)
 
+            self.camera_pitch += mouse.y * 10
+            if self.camera_pitch > 90:
+                self.camera_pitch = 90
+            elif self.camera_pitch < -90:
+                self.camera_pitch = -90
+
         # Update the camera
         cam_pos = self.playernp.get_pos()
         cam_pos.z += self.player.get_shape().get_half_height()
         self.camera.set_pos(cam_pos)
+
         self.camera.set_hpr(self.playernp.get_hpr())
+        self.camera.set_p(self.camera_pitch)
         return task.cont
