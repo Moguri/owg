@@ -16,6 +16,8 @@ class PlayerController(DirectObject):
         halfx = self.window.get_x_size() / 2
         halfy = self.window.get_y_size() / 2
         self.window.move_pointer(0, halfx, halfy)
+        self.mousex_sensitivity = 1000
+        self.mousey_sensitivity = 10
 
         self.camera_pitch = 0
 
@@ -61,9 +63,9 @@ class PlayerController(DirectObject):
             halfx = self.window.get_x_size() / 2
             halfy = self.window.get_y_size() / 2
             self.window.move_pointer(0, halfx, halfy)
-            self.player.set_angular_movement(-mouse.x * 1000)
+            self.player.set_angular_movement(-mouse.x * self.mousex_sensitivity)
 
-            self.camera_pitch += mouse.y * 10
+            self.camera_pitch += mouse.y * self.mousey_sensitivity
             if self.camera_pitch > 90:
                 self.camera_pitch = 90
             elif self.camera_pitch < -90:
