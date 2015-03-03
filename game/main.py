@@ -34,7 +34,8 @@ class GameApp(ShowBase):
         phydebug.show_wireframe(True)
         phydebug.show_bounding_boxes(True)
         phydebugnp = self.render.attach_new_node(phydebug)
-        phydebugnp.show()
+        # Uncomment to show debug physics
+        # phydebugnp.show()
         self.physics_world.set_debug_node(phydebug)
 
         self.render.set_shader_auto()
