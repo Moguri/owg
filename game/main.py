@@ -4,11 +4,14 @@ from __future__ import print_function
 import random
 
 from direct.showbase.ShowBase import ShowBase
+from panda3d.bullet import BulletWorld, BulletDebugNode
 import panda3d.core as p3d
 
 from citygen import *
 
 import inputmapper
+import character
+from player_controller import PlayerController
 
 
 class GameApp(ShowBase):
@@ -17,6 +20,18 @@ class GameApp(ShowBase):
         ShowBase.__init__(self)
 
         self.input_mapper = inputmapper.InputMapper('input.conf')
+        self.disableMouse()
+
+        self.physics_world = BulletWorld()
+        self.physics_world.set_gravity(p3d.Vec3(0, 0, -9.81))
+        self.taskMgr.add(self.update_physics, 'Update Physics')
+
+        phydebug = BulletDebugNode('Physics Debug')
+        phydebug.show_wireframe(True)
+        phydebug.show_bounding_boxes(True)
+        phydebugnp = self.render.attach_new_node(phydebug)
+        phydebugnp.show()
+        self.physics_world.set_debug_node(phydebug)
 
         self.render.set_shader_auto()
 
@@ -39,6 +54,13 @@ class GameApp(ShowBase):
         self.import_city(city)
         player_spawn = random.choice(city.spawn_points)
         print("Spawn player at", player_spawn)
+
+        player = character.Character('player')
+        playernp = self.render.attach_new_node(player)
+        playernp.set_pos(player_spawn)
+        self.physics_world.attach_character(player)
+        self.player_controller = PlayerController(player, playernp, self.camera)
+        self.taskMgr.add(self.player_controller.update, 'Player Controller')
 
     def create_mesh(self, mesh, name, material):
             node = p3d.GeomNode(name)
@@ -94,6 +116,12 @@ class GameApp(ShowBase):
         color = [c/255.0 for c in (7, 105, 105)]
         road_mat.set_diffuse(p3d.VBase4(color[0], color[1], color[2], 1.0))
         self.create_mesh(city.road_mesh, "road", road_mat)
+
+    # Tasks
+    def update_physics(self, task):
+        dt = globalClock.getDt()
+        self.physics_world.do_physics(dt)
+        return task.cont
 
 
 if __name__ == '__main__':
