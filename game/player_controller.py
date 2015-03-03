@@ -32,6 +32,7 @@ class PlayerController(DirectObject):
         self.accept('move_left-up', self.update_movement, ['left', False])
         self.accept('move_right', self.update_movement, ['right', True])
         self.accept('move_right-up', self.update_movement, ['right', False])
+        self.accept('jump', self.jump)
 
     def update_movement(self, direction, activate):
         move_delta = p3d.Vec3(0, 0, 0)
@@ -49,6 +50,10 @@ class PlayerController(DirectObject):
             move_delta *= -1
 
         self.player_movement += move_delta
+
+    def jump(self):
+        if self.player.is_on_ground():
+            self.player.do_jump()
 
     def update(self, task):
         # Update movement
