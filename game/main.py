@@ -21,6 +21,10 @@ class GameApp(ShowBase):
 
         self.input_mapper = inputmapper.InputMapper('input.conf')
         self.disableMouse()
+        wp = p3d.WindowProperties()
+        wp.set_cursor_hidden(True)
+        wp.set_mouse_mode(p3d.WindowProperties.MRelative)
+        self.win.requestProperties(wp)
 
         self.physics_world = bullet.BulletWorld()
         self.physics_world.set_gravity(p3d.Vec3(0, 0, -9.81))
@@ -59,7 +63,11 @@ class GameApp(ShowBase):
         playernp = self.render.attach_new_node(player)
         playernp.set_pos(player_spawn)
         self.physics_world.attach_character(player)
-        self.player_controller = PlayerController(player, playernp, self.camera)
+        self.player_controller = PlayerController(player,
+                                                  playernp,
+                                                  self.camera,
+                                                  self.mouseWatcherNode,
+                                                  self.win)
         self.taskMgr.add(self.player_controller.update, 'Player Controller')
 
     def create_mesh(self, mesh, name, material):

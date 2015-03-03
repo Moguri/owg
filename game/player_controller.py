@@ -4,12 +4,16 @@ import panda3d.core as p3d
 
 class PlayerController(DirectObject):
 
-    def __init__(self, player, playernp, camera):
+    def __init__(self, player, playernp, camera, mouse_watcher_node, win):
         DirectObject.__init__(self)
 
         self.player = player
         self.playernp = playernp
         self.camera = camera
+        self.mouse_watcher_node = mouse_watcher_node
+        self.window = win
+
+        self.window.move_pointer(0, 0, 0)
 
         self.player_movement = p3d.Vec3(0, 0, 0)
         self.player_speed = 10
@@ -47,8 +51,15 @@ class PlayerController(DirectObject):
         movement *= self.player_speed
         self.player.set_linear_movement(movement, True)
 
+        # Mouse movement
+        if self.mouse_watcher_node.has_mouse():
+            mouse = self.mouse_watcher_node.get_mouse()
+            halfx = self.window.get_x_size() / 2
+            halfy = self.window.get_y_size() / 2
+            self.window.move_pointer(0, halfx, halfy)
+            self.player.set_angular_movement(-mouse.x * 1000)
+
         # Update the camera
-        pos = self.playernp.get_pos()
-        self.camera.set_pos(pos)
+        self.camera.set_pos(self.playernp.get_pos())
         self.camera.set_hpr(self.playernp.get_hpr())
         return task.cont
