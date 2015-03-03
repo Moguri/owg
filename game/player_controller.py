@@ -60,6 +60,8 @@ class PlayerController(DirectObject):
             self.player.set_angular_movement(-mouse.x * 1000)
 
         # Update the camera
-        self.camera.set_pos(self.playernp.get_pos())
+        cam_pos = self.playernp.get_pos()
+        cam_pos.z += self.player.get_shape().get_half_height()
+        self.camera.set_pos(cam_pos)
         self.camera.set_hpr(self.playernp.get_hpr())
         return task.cont
