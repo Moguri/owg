@@ -2,13 +2,14 @@ import random
 
 
 class City(object):
-	__slots__ = ["buildings", "spawn_points", "meshes", "materials"]
+	__slots__ = ["buildings", "road_mesh", "spawn_points", "meshes", "materials"]
 
 	def __init__(self):
 		self.buildings = []
 		self.meshes = []
 		self.materials = []
 		self.spawn_points = []
+		self.road_mesh = None
 
 
 class Building(object):
@@ -99,17 +100,42 @@ def gen_city(city_width=500, city_height=500, lane_width=6, block_width=80, bloc
 
 	# Blocks
 	blocks = []
+	road_verts = []
+	road_faces = []
 	for i in range(len(vert_roads)):
 		x1 = 0.0 if i == 0 else vert_roads[i-1] + lane_width
+		x1 += x_offset
 		x2 = vert_roads[i] - lane_width
+		x2 += x_offset
 		for j in range(len(hor_roads)):
 			y1 = 0.0 if j == 0 else hor_roads[j-1] + lane_width
+			y1 += y_offset
 			y2 = hor_roads[j] - lane_width
+			y2 += y_offset
 
-			blocks.append((x1+x_offset, y1+y_offset, x2+x_offset, y2+y_offset))
+			blocks.append((x1, y1, x2, y2))
 
 			if i != len(vert_roads)-1 and j != len(hor_roads)-1:
 				city.spawn_points.append((vert_roads[i] - x_off, hor_roads[j] - y_off, 0.0))
+				verts = []
+				normal = (0, 0, 1)
+				x3 = vert_roads[i] + lane_width + x_offset
+				y3 = hor_roads[j] + lane_width + y_offset
+				vert_off = len(road_verts)
+				road_verts.append(Vertex((x2 - x_off, y2 - y_off, 0.0), normal))
+				road_verts.append(Vertex((x3 - x_off, y2 - y_off, 0.0), normal))
+				road_verts.append(Vertex((x3 - x_off, y3 - y_off, 0.0), normal))
+				road_verts.append(Vertex((x2 - x_off, y3 - y_off, 0.0), normal))
+				road_faces.append((vert_off + 0, vert_off + 1, vert_off + 2))
+				road_faces.append((vert_off + 2, vert_off + 3, vert_off + 0))
+				if j > 0:
+					road_faces.append((vert_off-1, vert_off-2, vert_off+1))
+					road_faces.append((vert_off+1, vert_off+0, vert_off-1))
+				if i > 0:
+					vert_x_off = vert_off - (len(hor_roads)-1) * 4
+					road_faces.append((vert_x_off+1, vert_off+0, vert_off+3))
+					road_faces.append((vert_off+3, vert_x_off+2, vert_x_off+1))
+	city.road_mesh = Mesh(road_verts, road_faces)
 
 	# Lots
 	lots = []

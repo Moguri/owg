@@ -40,22 +40,7 @@ class GameApp(ShowBase):
         player_spawn = random.choice(city.spawn_points)
         print("Spawn player at", player_spawn)
 
-    def import_city(self, city):
-        colors = []
-        colors.append((112, 163, 10))
-        colors.append((90, 135, 10))
-        colors.append((67, 100, 10))
-        building_mats = []
-        for color in colors:
-            mat = p3d.Material()
-            mat.set_shininess(1.0)
-            color = [c/255.0 for c in color]
-            mat.set_diffuse(p3d.VBase4(color[0], color[1], color[2], 1.0))
-            building_mats.append(mat)
-
-        for i, building in enumerate(city.buildings):
-            mesh = building.mesh
-            name = str(i)
+    def create_mesh(self, mesh, name, material):
             node = p3d.GeomNode(name)
 
             vdata = p3d.GeomVertexData(name,
@@ -75,16 +60,40 @@ class GameApp(ShowBase):
             for face in mesh.faces:
                 prim.add_vertices(*face)
 
-            mat = random.choice(building_mats)
             render_state = p3d.RenderState.make_empty()
 
-            render_state = render_state.set_attrib(p3d.MaterialAttrib.make(mat))
+            render_state = render_state.set_attrib(p3d.MaterialAttrib.make(material))
 
             geom = p3d.Geom(vdata)
             geom.add_primitive(prim)
             node.add_geom(geom, render_state)
 
             self.render.attach_new_node(node)
+
+    def import_city(self, city):
+        colors = []
+        colors.append((112, 163, 10))
+        colors.append((90, 135, 10))
+        colors.append((67, 100, 10))
+        building_mats = []
+        for color in colors:
+            mat = p3d.Material()
+            mat.set_shininess(1.0)
+            color = [c/255.0 for c in color]
+            mat.set_diffuse(p3d.VBase4(color[0], color[1], color[2], 1.0))
+            building_mats.append(mat)
+
+        for i, building in enumerate(city.buildings):
+            mesh = building.mesh
+            name = str(i)
+            mat = random.choice(building_mats)
+            self.create_mesh(mesh, name, mat)
+
+        road_mat = p3d.Material()
+        road_mat.set_shininess(1.0)
+        color = [c/255.0 for c in (7, 105, 105)]
+        road_mat.set_diffuse(p3d.VBase4(color[0], color[1], color[2], 1.0))
+        self.create_mesh(city.road_mesh, "road", road_mat)
 
 
 if __name__ == '__main__':
