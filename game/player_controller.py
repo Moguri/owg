@@ -1,4 +1,5 @@
 from direct.showbase.DirectObject import DirectObject
+from direct.gui.OnscreenImage import OnscreenImage
 import panda3d.core as p3d
 
 
@@ -12,6 +13,12 @@ class PlayerController(DirectObject):
         self.camera = camera
         self.mouse_watcher_node = mouse_watcher_node
         self.window = win
+
+        # Crosshair
+        self.crosshair = OnscreenImage(image='crosshair.png',
+                                       scale=(0.1, 0, 0.1),
+                                       pos=(0, 0, 0))
+        self.crosshair.set_transparency(p3d.TransparencyAttrib.MAlpha)
 
         halfx = self.window.get_x_size() / 2
         halfy = self.window.get_y_size() / 2
