@@ -117,11 +117,14 @@ def gen_city(city_width=500, city_height=500, lane_width=6, block_width=80, bloc
             blocks.append((x1, y1, x2, y2))
 
             if i != len(vert_roads)-1 and j != len(hor_roads)-1:
-                city.spawn_points.append((vert_roads[i] - x_off, hor_roads[j] - y_off, 0.0))
                 verts = []
                 normal = (0, 0, 1)
                 x3 = vert_roads[i] + lane_width + x_offset
                 y3 = hor_roads[j] + lane_width + y_offset
+
+                spawn_point = ((x2+x3)/2.0-x_off, (y2+y3)/2.0-y_off, 0.0)
+                city.spawn_points.append(spawn_point)
+
                 vert_off = len(road_verts)
                 road_verts.append(Vertex((x2 - x_off, y2 - y_off, 0.0), normal))
                 road_verts.append(Vertex((x3 - x_off, y2 - y_off, 0.0), normal))
