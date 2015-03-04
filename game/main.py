@@ -58,7 +58,6 @@ class GameApp(ShowBase):
 
         self.import_city(city)
         player_spawn = random.choice(city.spawn_points)
-        print("Spawn player at", player_spawn)
 
         player = character.Character('player')
         playernp = self.render.attach_new_node(player)
@@ -70,6 +69,14 @@ class GameApp(ShowBase):
                                                   self.mouseWatcherNode,
                                                   self.win)
         self.taskMgr.add(self.player_controller.update, 'Player Controller')
+
+        # Demon portals
+        self.demon_portals = random.sample(city.spawn_points, 5)
+        model = self.loader.loadModel("models/demon_portal.egg")
+        for point in self.demon_portals:
+            placeholder = self.render.attach_new_node("placeholder")
+            placeholder.set_pos(point[0], point[1], point[2]+1)
+            model.instance_to(placeholder)
 
     def create_mesh(self, mesh, name, material):
             node = p3d.GeomNode(name)
