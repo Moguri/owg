@@ -13,9 +13,10 @@ class City(object):
 
 
 class Building(object):
-    __slots__ = ["mesh"]
+    __slots__ = ["position", "mesh"]
 
-    def __init__(self, mesh):
+    def __init__(self, position, mesh):
+        self.position = position
         self.mesh = mesh
 
 
@@ -148,41 +149,43 @@ def gen_city(city_width=500, city_height=500, lane_width=6, block_width=80, bloc
         height = floors * 4
 
         verts = []
+        pos_x = (lot[0] + lot[2]) / 2.0# - x_off
+        pos_y = (lot[1] + lot[3]) / 2.0# - y_off
 
         # Top
         normal = (0, 0, 1)
-        verts.append(Vertex((lot[0] - x_off, lot[1] - y_off, height), normal))
-        verts.append(Vertex((lot[2] - x_off, lot[1] - y_off, height), normal))
-        verts.append(Vertex((lot[2] - x_off, lot[3] - y_off, height), normal))
-        verts.append(Vertex((lot[0] - x_off, lot[3] - y_off, height), normal))
+        verts.append(Vertex((lot[0] - pos_x, lot[1] - pos_y, height), normal))
+        verts.append(Vertex((lot[2] - pos_x, lot[1] - pos_y, height), normal))
+        verts.append(Vertex((lot[2] - pos_x, lot[3] - pos_y, height), normal))
+        verts.append(Vertex((lot[0] - pos_x, lot[3] - pos_y, height), normal))
 
         #North
         normal = (0, 1, 0)
-        verts.append(Vertex((lot[2] - x_off, lot[1] - y_off, height), normal))
-        verts.append(Vertex((lot[0] - x_off, lot[1] - y_off, height), normal))
-        verts.append(Vertex((lot[0] - x_off, lot[1] - y_off, 0.0), normal))
-        verts.append(Vertex((lot[2] - x_off, lot[1] - y_off, 0.0), normal))
+        verts.append(Vertex((lot[2] - pos_x, lot[1] - pos_y, height), normal))
+        verts.append(Vertex((lot[0] - pos_x, lot[1] - pos_y, height), normal))
+        verts.append(Vertex((lot[0] - pos_x, lot[1] - pos_y, 0.0), normal))
+        verts.append(Vertex((lot[2] - pos_x, lot[1] - pos_y, 0.0), normal))
 
         # East
         normal = (1, 0, 0)
-        verts.append(Vertex((lot[2] - x_off, lot[3] - y_off, height), normal))
-        verts.append(Vertex((lot[2] - x_off, lot[1] - y_off, height), normal))
-        verts.append(Vertex((lot[2] - x_off, lot[1] - y_off, 0.0), normal))
-        verts.append(Vertex((lot[2] - x_off, lot[3] - y_off, 0.0), normal))
+        verts.append(Vertex((lot[2] - pos_x, lot[3] - pos_y, height), normal))
+        verts.append(Vertex((lot[2] - pos_x, lot[1] - pos_y, height), normal))
+        verts.append(Vertex((lot[2] - pos_x, lot[1] - pos_y, 0.0), normal))
+        verts.append(Vertex((lot[2] - pos_x, lot[3] - pos_y, 0.0), normal))
 
         # South
         normal = (0, -1, 0)
-        verts.append(Vertex((lot[0] - x_off, lot[3] - y_off, height), normal))
-        verts.append(Vertex((lot[2] - x_off, lot[3] - y_off, height), normal))
-        verts.append(Vertex((lot[2] - x_off, lot[3] - y_off, 0.0), normal))
-        verts.append(Vertex((lot[0] - x_off, lot[3] - y_off, 0.0), normal))
+        verts.append(Vertex((lot[0] - pos_x, lot[3] - pos_y, height), normal))
+        verts.append(Vertex((lot[2] - pos_x, lot[3] - pos_y, height), normal))
+        verts.append(Vertex((lot[2] - pos_x, lot[3] - pos_y, 0.0), normal))
+        verts.append(Vertex((lot[0] - pos_x, lot[3] - pos_y, 0.0), normal))
 
         # West
         normal = (-1, 0, 0)
-        verts.append(Vertex((lot[0] - x_off, lot[1] - y_off, height), normal))
-        verts.append(Vertex((lot[0] - x_off, lot[3] - y_off, height), normal))
-        verts.append(Vertex((lot[0] - x_off, lot[3] - y_off, 0.0), normal))
-        verts.append(Vertex((lot[0] - x_off, lot[1] - y_off, 0.0), normal))
+        verts.append(Vertex((lot[0] - pos_x, lot[1] - pos_y, height), normal))
+        verts.append(Vertex((lot[0] - pos_x, lot[3] - pos_y, height), normal))
+        verts.append(Vertex((lot[0] - pos_x, lot[3] - pos_y, 0.0), normal))
+        verts.append(Vertex((lot[0] - pos_x, lot[1] - pos_y, 0.0), normal))
 
         # Bottom
         # verts.append((lot[0] - x_off, lot[1] - y_off, 0.0))
@@ -209,7 +212,7 @@ def gen_city(city_width=500, city_height=500, lane_width=6, block_width=80, bloc
 
         mesh = Mesh(verts, faces)
         city.meshes.append(mesh)
-        city.buildings.append(Building(mesh))
+        city.buildings.append(Building((pos_x-x_off, pos_y-y_off, 0.0), mesh))
 
     return city
 

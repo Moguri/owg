@@ -99,7 +99,7 @@ class GameApp(ShowBase):
             geom.add_primitive(prim)
             node.add_geom(geom, render_state)
 
-            self.render.attach_new_node(node)
+            return self.render.attach_new_node(node)
 
     def import_city(self, city):
         colors = []
@@ -118,7 +118,8 @@ class GameApp(ShowBase):
             mesh = building.mesh
             name = str(i)
             mat = random.choice(building_mats)
-            self.create_mesh(mesh, name, mat)
+            np = self.create_mesh(mesh, name, mat)
+            np.set_pos(p3d.VBase3(*building.position))
 
         road_mat = p3d.Material()
         road_mat.set_shininess(1.0)
@@ -130,7 +131,6 @@ class GameApp(ShowBase):
         node.add_shape(bullet.BulletPlaneShape(p3d.Vec3(0, 0, 1), 0))
         self.render.attach_new_node(node)
         self.physics_world.attach_rigid_body(node)
-
 
     # Tasks
     def update_physics(self, task):
