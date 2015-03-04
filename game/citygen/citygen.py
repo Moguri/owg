@@ -13,11 +13,12 @@ class City(object):
 
 
 class Building(object):
-    __slots__ = ["position", "mesh"]
+    __slots__ = ["position", "mesh", "collision"]
 
-    def __init__(self, position, mesh):
+    def __init__(self, position, mesh, collision):
         self.position = position
         self.mesh = mesh
+        self.collision = collision
 
 
 class Mesh(object):
@@ -213,9 +214,11 @@ def gen_city(city_width=500, city_height=500, lane_width=6, block_width=80, bloc
         faces.append((16, 17, 18))
         faces.append((18, 19, 16))
 
+        pos = (pos_x-x_off, pos_y-y_off, 0.0)
         mesh = Mesh(verts, faces)
         city.meshes.append(mesh)
-        city.buildings.append(Building((pos_x-x_off, pos_y-y_off, 0.0), mesh))
+        collision = ((lot[2]-lot[0])/2.0, (lot[3] - lot[1])/2.0, height/2.0)
+        city.buildings.append(Building(pos, mesh, collision))
 
     return city
 

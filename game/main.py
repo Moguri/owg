@@ -121,6 +121,14 @@ class GameApp(ShowBase):
             np = self.create_mesh(mesh, name, mat)
             np.set_pos(p3d.VBase3(*building.position))
 
+            node = bullet.BulletRigidBodyNode(name)
+            node.add_shape(bullet.BulletBoxShape(p3d.Vec3(building.collision)))
+            np = self.render.attach_new_node(node)
+            pos = list(building.position)
+            pos[2] += building.collision[2]
+            np.set_pos(p3d.VBase3(*pos))
+            self.physics_world.attach_rigid_body(node)
+
         road_mat = p3d.Material()
         road_mat.set_shininess(1.0)
         color = [c/255.0 for c in (7, 105, 105)]
