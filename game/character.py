@@ -11,7 +11,7 @@ class Character(BulletCharacterControllerNode):
 
         # These are rather arbitrary at the moment
         height = 1.75
-        radius = 0.4
+        radius = 0.6
         self.shape = BulletCapsuleShape(radius, height - 2 * radius, ZUp)
 
         BulletCharacterControllerNode.__init__(self,

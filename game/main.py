@@ -40,6 +40,8 @@ class GameApp(ShowBase):
 
         self.render.set_shader_auto()
 
+        self.camLens.set_near(0.5)
+
         light = p3d.DirectionalLight('sun')
         light.set_color(p3d.VBase4(1.0, 0.94, 0.84, 1.0))
         light_np = self.render.attach_new_node(light)
