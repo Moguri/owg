@@ -62,11 +62,9 @@ class GameApp(ShowBase):
         self.import_city(city)
         player_spawn = random.choice(city.spawn_points)
 
-        player = character.Character('player')
-        playernp = self.render.attach_new_node(player)
-        playernp.set_pos(player_spawn)
-        self.physics_world.attach_character(player)
-        self.player_controller = PlayerController(player, playernp)
+        player = character.Character('player', self.render, 1.75, 0.6)
+        player.set_pos(player_spawn)
+        self.player_controller = PlayerController(player)
         self.taskMgr.add(self.player_controller.update, 'Player Controller')
 
         self.demon_manager = DemonManager(city, self.physics_world)

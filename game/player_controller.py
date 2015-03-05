@@ -5,11 +5,10 @@ import panda3d.core as p3d
 
 class PlayerController(DirectObject):
 
-    def __init__(self, player, playernp):
+    def __init__(self, player):
         DirectObject.__init__(self)
 
         self.player = player
-        self.playernp = playernp
 
         # Crosshair
         self.crosshair = OnscreenImage(image='crosshair.png',
@@ -78,7 +77,7 @@ class PlayerController(DirectObject):
         movement = p3d.Vec3(self.player_movement)
         movement.normalize()
         movement *= self.player_speed
-        self.player.set_linear_movement(movement, True)
+        self.player.set_linear_movement(movement)
 
         # Mouse movement
         if base.mouseWatcherNode.has_mouse():
@@ -95,10 +94,10 @@ class PlayerController(DirectObject):
                 self.camera_pitch = -90
 
         # Update the camera
-        cam_pos = self.playernp.get_pos()
+        cam_pos = self.player.get_pos()
         cam_pos.z += self.player.get_shape().get_half_height()
         base.camera.set_pos(cam_pos)
 
-        base.camera.set_hpr(self.playernp.get_hpr())
+        base.camera.set_hpr(self.player.get_hpr())
         base.camera.set_p(self.camera_pitch)
         return task.cont
