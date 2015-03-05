@@ -68,6 +68,7 @@ class GameApp(ShowBase):
         self.player_controller = PlayerController(player,
                                                   playernp,
                                                   self.camera,
+                                                  self.physics_world,
                                                   self.mouseWatcherNode,
                                                   self.win)
         self.taskMgr.add(self.player_controller.update, 'Player Controller')

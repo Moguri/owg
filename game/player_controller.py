@@ -5,12 +5,13 @@ import panda3d.core as p3d
 
 class PlayerController(DirectObject):
 
-    def __init__(self, player, playernp, camera, mouse_watcher_node, win):
+    def __init__(self, player, playernp, camera, physworld, mouse_watcher_node, win):
         DirectObject.__init__(self)
 
         self.player = player
         self.playernp = playernp
         self.camera = camera
+        self.physworld = physworld
         self.mouse_watcher_node = mouse_watcher_node
         self.window = win
 
@@ -40,6 +41,7 @@ class PlayerController(DirectObject):
         self.accept('move_right', self.update_movement, ['right', True])
         self.accept('move_right-up', self.update_movement, ['right', False])
         self.accept('jump', self.jump)
+        self.accept('fire', self.fire)
 
     def update_movement(self, direction, activate):
         move_delta = p3d.Vec3(0, 0, 0)
@@ -61,6 +63,19 @@ class PlayerController(DirectObject):
     def jump(self):
         if self.player.is_on_ground():
             self.player.do_jump()
+
+    def fire(self):
+        from_point = p3d.Point3()
+        to_point = p3d.Point3()
+        base.camLens.extrude(p3d.Point2(0, 0), from_point, to_point)
+
+        from_point = render.get_relative_point(self.camera, from_point)
+        to_point = render.get_relative_point(self.camera, to_point)
+
+        result = self.physworld.ray_test_closest(from_point, to_point)
+
+        if (result.has_hit()):
+            print(result.get_node())
 
     def update(self, task):
         # Update movement
