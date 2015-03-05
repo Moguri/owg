@@ -1,18 +1,35 @@
 from panda3d.bullet import BulletCharacterControllerNode
 from panda3d.bullet import BulletCapsuleShape
 from panda3d.bullet import ZUp
+from direct.showbase.DirectObject import DirectObject
 
 
-class Character(object):
+class Character(DirectObject):
+    next_id = 1
 
     def __init__(self, name, root, height, radius):
+        self.hp = 1
+        self.id = self.next_id
+
         # Setup physics
         shape = BulletCapsuleShape(radius, height - 2 * radius, ZUp)
         self.physics_node = BulletCharacterControllerNode(shape, radius, name)
         base.physics_world.attach_character(self.physics_node)
+        self.physics_node.setPythonTag('character_id', self.id)
 
         # Attach to the scenegraph
         self.nodepath = root.attach_new_node(self.physics_node)
+
+        self.accept('character_hit', self.on_hit)
+
+    def destroy(self):
+        base.physics_world.remove(self.physics_node)
+        self.nodepath.remove_node()
+        self.ignoreAll()
+
+    def on_hit(self, id):
+        if id == self.id:
+            self.hp -= 1
 
     def set_pos(self, pos):
         self.nodepath.set_pos(pos)

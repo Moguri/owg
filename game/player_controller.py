@@ -69,8 +69,10 @@ class PlayerController(DirectObject):
 
         result = base.physics_world.ray_test_closest(from_point, to_point)
 
-        if (result.has_hit()):
-            print(result.get_node())
+        node = result.get_node()
+        if (node and node.get_python_tag('character_id')):
+            cid = node.get_python_tag('character_id')
+            base.messenger.send('character_hit', cid)
 
     def update(self, task):
         # Update movement
