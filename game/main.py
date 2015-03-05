@@ -12,6 +12,7 @@ from citygen import *
 import inputmapper
 import character
 from player_controller import PlayerController
+from demon_manager import DemonManager
 
 
 class GameApp(ShowBase):
@@ -73,13 +74,8 @@ class GameApp(ShowBase):
                                                   self.win)
         self.taskMgr.add(self.player_controller.update, 'Player Controller')
 
-        # Demon portals
-        self.demon_portals = random.sample(city.spawn_points, 5)
-        model = self.loader.loadModel("models/demon_portal.egg")
-        for point in self.demon_portals:
-            placeholder = self.render.attach_new_node("placeholder")
-            placeholder.set_pos(point[0], point[1], point[2]+1)
-            model.instance_to(placeholder)
+        self.demon_manager = DemonManager(city, self.physics_world)
+        self.taskMgr.add(self.demon_manager.update, 'Demon Manager')
 
     def create_mesh(self, mesh, name, material):
             node = p3d.GeomNode(name)
