@@ -5,15 +5,11 @@ import panda3d.core as p3d
 
 class PlayerController(DirectObject):
 
-    def __init__(self, player, playernp, camera, physworld, mouse_watcher_node, win):
+    def __init__(self, player, playernp):
         DirectObject.__init__(self)
 
         self.player = player
         self.playernp = playernp
-        self.camera = camera
-        self.physworld = physworld
-        self.mouse_watcher_node = mouse_watcher_node
-        self.window = win
 
         # Crosshair
         self.crosshair = OnscreenImage(image='crosshair.png',
@@ -21,9 +17,9 @@ class PlayerController(DirectObject):
                                        pos=(0, 0, 0))
         self.crosshair.set_transparency(p3d.TransparencyAttrib.MAlpha)
 
-        halfx = self.window.get_x_size() / 2
-        halfy = self.window.get_y_size() / 2
-        self.window.move_pointer(0, halfx, halfy)
+        halfx = base.win.get_x_size() / 2
+        halfy = base.win.get_y_size() / 2
+        base.win.move_pointer(0, halfx, halfy)
         self.mousex_sensitivity = 1000
         self.mousey_sensitivity = 10
 
@@ -69,10 +65,10 @@ class PlayerController(DirectObject):
         to_point = p3d.Point3()
         base.camLens.extrude(p3d.Point2(0, 0), from_point, to_point)
 
-        from_point = render.get_relative_point(self.camera, from_point)
-        to_point = render.get_relative_point(self.camera, to_point)
+        from_point = base.render.get_relative_point(base.camera, from_point)
+        to_point = base.render.get_relative_point(base.camera, to_point)
 
-        result = self.physworld.ray_test_closest(from_point, to_point)
+        result = base.physics_world.ray_test_closest(from_point, to_point)
 
         if (result.has_hit()):
             print(result.get_node())
@@ -85,11 +81,11 @@ class PlayerController(DirectObject):
         self.player.set_linear_movement(movement, True)
 
         # Mouse movement
-        if self.mouse_watcher_node.has_mouse():
-            mouse = self.mouse_watcher_node.get_mouse()
-            halfx = self.window.get_x_size() / 2
-            halfy = self.window.get_y_size() / 2
-            self.window.move_pointer(0, halfx, halfy)
+        if base.mouseWatcherNode.has_mouse():
+            mouse = base.mouseWatcherNode.get_mouse()
+            halfx = base.win.get_x_size() / 2
+            halfy = base.win.get_y_size() / 2
+            base.win.move_pointer(0, halfx, halfy)
             self.player.set_angular_movement(-mouse.x * self.mousex_sensitivity)
 
             self.camera_pitch += mouse.y * self.mousey_sensitivity
@@ -101,8 +97,8 @@ class PlayerController(DirectObject):
         # Update the camera
         cam_pos = self.playernp.get_pos()
         cam_pos.z += self.player.get_shape().get_half_height()
-        self.camera.set_pos(cam_pos)
+        base.camera.set_pos(cam_pos)
 
-        self.camera.set_hpr(self.playernp.get_hpr())
-        self.camera.set_p(self.camera_pitch)
+        base.camera.set_hpr(self.playernp.get_hpr())
+        base.camera.set_p(self.camera_pitch)
         return task.cont

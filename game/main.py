@@ -66,12 +66,7 @@ class GameApp(ShowBase):
         playernp = self.render.attach_new_node(player)
         playernp.set_pos(player_spawn)
         self.physics_world.attach_character(player)
-        self.player_controller = PlayerController(player,
-                                                  playernp,
-                                                  self.camera,
-                                                  self.physics_world,
-                                                  self.mouseWatcherNode,
-                                                  self.win)
+        self.player_controller = PlayerController(player, playernp)
         self.taskMgr.add(self.player_controller.update, 'Player Controller')
 
         self.demon_manager = DemonManager(city, self.physics_world)
