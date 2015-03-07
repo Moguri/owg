@@ -3,6 +3,8 @@ import random
 import panda3d.bullet as bullet
 import panda3d.core as p3d
 
+from character import Character
+
 
 class DemonPortal(object):
     __slots__ = ["position", "time_to_spawn", "demons"]
@@ -30,6 +32,8 @@ class DemonManager(object):
         self.physics_world = physics_world
 
         self.demon_model = base.loader.loadModel("models/demon.egg")
+        bounds = self.demon_model.get_tight_bounds()
+        self.demon_model_half_height = (bounds[1] - bounds[0]).z / 2.0
         self.portal_model = base.loader.loadModel("models/demon_portal.egg")
 
         portal_positions = random.sample(city.spawn_points, 1)
@@ -43,6 +47,11 @@ class DemonManager(object):
     def update(self, task):
         dt = globalClock.getDt()
         for portal in self.demon_portals:
+            for demon in portal.demons[:]:
+                if demon.hp <= 0:
+                    demon.destroy()
+                    portal.demons.remove(demon)
+
             if len(portal.demons) >= 5:
                 continue
 
@@ -50,19 +59,23 @@ class DemonManager(object):
             if portal.time_to_spawn < 0:
                 portal.new_time()
 
-                node = bullet.BulletRigidBodyNode("Demon")
-                node.add_shape(bullet.BulletBoxShape(p3d.Vec3(0.5, 0.5, 0.75)))
-                self.physics_world.attach_rigid_body(node)
+                demon = Character("Demon", base.render, 1.75, 0.6)
 
-                np = base.render.attach_new_node(node)
+                # Position the new demon
                 pos = p3d.Vec3(portal.position)
                 x = random.random() * 2.0 - 1.0
                 y = random.random() * 2.0 - 1.0
                 offset = p3d.Vec3(x, y, 0)
                 pos += offset * 5
+                demon.set_pos(pos)
+
+                # Attach a mesh
+                np = self.demon_model.instance_under_node(demon.nodepath, 'demon_mesh')
+                pos = np.get_pos()
+                pos.z -= self.demon_model_half_height
                 np.set_pos(pos)
-                portal.demons.append(DemonSoldier(np))
-                self.demon_model.instance_to(np)
+
+                portal.demons.append(demon)
 
         return task.cont
 
