@@ -19,8 +19,12 @@ class PlayerController(DirectObject):
         halfx = base.win.get_x_size() / 2
         halfy = base.win.get_y_size() / 2
         base.win.move_pointer(0, halfx, halfy)
-        self.mousex_sensitivity = 1000
-        self.mousey_sensitivity = 10
+        mx_sens_config = p3d.ConfigVariableInt('mousex_sensitivity', 100)
+        self.mousex_sensitivity = mx_sens_config.get_value() * 10.0
+        my_sens_config = p3d.ConfigVariableInt('mousey_sensitivity', 100)
+        self.mousey_sensitivity = my_sens_config.get_value() / 10.0
+
+        print(self.mousex_sensitivity, self.mousey_sensitivity)
 
         self.camera_pitch = 0
 
