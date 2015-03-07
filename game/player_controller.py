@@ -72,7 +72,7 @@ class PlayerController(DirectObject):
         node = result.get_node()
         if (node and node.get_python_tag('character_id')):
             cid = node.get_python_tag('character_id')
-            base.messenger.send('character_hit', cid)
+            base.messenger.send('character_hit', [cid])
 
     def update(self, task):
         # Update movement

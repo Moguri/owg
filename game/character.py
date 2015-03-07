@@ -9,7 +9,8 @@ class Character(DirectObject):
 
     def __init__(self, name, root, height, radius):
         self.hp = 1
-        self.id = self.next_id
+        self.id = Character.next_id
+        Character.next_id += 1
 
         # Setup physics
         shape = BulletCapsuleShape(radius, height - 2 * radius, ZUp)
