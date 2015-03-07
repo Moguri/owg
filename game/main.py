@@ -147,5 +147,6 @@ class GameApp(ShowBase):
 
 
 if __name__ == '__main__':
+    p3d.load_prc_file('user_config.prc')
     app = GameApp()
     app.run()
