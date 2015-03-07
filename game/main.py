@@ -2,6 +2,7 @@
 from __future__ import print_function
 
 import random
+import os
 
 from direct.showbase.ShowBase import ShowBase
 import panda3d.bullet as bullet
@@ -20,7 +21,8 @@ class GameApp(ShowBase):
     def __init__(self):
         ShowBase.__init__(self)
 
-        self.input_mapper = inputmapper.InputMapper('input.conf')
+        self.app_dir = os.path.dirname(os.path.abspath(__file__))
+        self.input_mapper = inputmapper.InputMapper(os.path.join(self.app_dir, 'input.conf'))
         self.disableMouse()
         wp = p3d.WindowProperties()
         wp.set_cursor_hidden(True)
