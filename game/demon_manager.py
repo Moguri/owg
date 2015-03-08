@@ -32,8 +32,9 @@ class DemonManager(object):
         self.physics_world = physics_world
 
         self.demon_model = base.loader.loadModel("models/demon.egg")
-        bounds = self.demon_model.get_tight_bounds()
-        self.demon_model_half_height = (bounds[1] - bounds[0]).z / 2.0
+        # TODO: Calculate bounds properly once we switch to 1.9
+        # bounds = self.demon_model.get_tight_bounds()
+        self.demon_model_half_height = 0.75 #(bounds[1] - bounds[0]).z / 2.0
         self.portal_model = base.loader.loadModel("models/demon_portal.egg")
 
         portal_positions = random.sample(city.spawn_points, 1)

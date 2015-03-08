@@ -24,7 +24,7 @@ class Character(DirectObject):
         self.accept('character_hit', self.on_hit)
 
     def destroy(self):
-        base.physics_world.remove(self.physics_node)
+        base.physics_world.remove_character(self.physics_node)
         self.nodepath.remove_node()
         self.ignoreAll()
 
