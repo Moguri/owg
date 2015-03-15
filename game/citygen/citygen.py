@@ -1,4 +1,31 @@
 import random
+import itertools
+
+
+RESOURCE_TYPES = [
+    "NONE",
+    "ALPHA",
+    "BETA",
+    "GAMMA",
+]
+
+
+RESOURCE_WEIGHTS = [
+    0.85,
+    0.05,
+    0.05,
+    0.05,
+]
+
+
+def weighted_choice(choices, weights):
+    total = sum(weights)
+    r = random.uniform(0, total)
+    i = 0
+    for choice, weight in itertools.izip(choices, weights):
+        if i + weight > r:
+            return choice
+        i += weight
 
 
 class City(object):
@@ -13,12 +40,13 @@ class City(object):
 
 
 class Building(object):
-    __slots__ = ["position", "mesh", "collision"]
+    __slots__ = ["position", "mesh", "collision", "resource"]
 
-    def __init__(self, position, mesh, collision):
+    def __init__(self, position, mesh, collision, resource):
         self.position = position
         self.mesh = mesh
         self.collision = collision
+        self.resource = resource
 
 
 class Mesh(object):
@@ -218,7 +246,9 @@ def gen_city(city_width=500, city_height=500, lane_width=6, block_width=80, bloc
         mesh = Mesh(verts, faces)
         city.meshes.append(mesh)
         collision = ((lot[2]-lot[0])/2.0, (lot[3] - lot[1])/2.0, height/2.0)
-        city.buildings.append(Building(pos, mesh, collision))
+        resource = weighted_choice(RESOURCE_TYPES, RESOURCE_WEIGHTS)
+        print(resource)
+        city.buildings.append(Building(pos, mesh, collision, resource))
 
     return city
 
