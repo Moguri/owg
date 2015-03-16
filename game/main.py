@@ -5,6 +5,7 @@ import random
 import os
 
 from direct.showbase.ShowBase import ShowBase
+import direct.gui as dgui
 import panda3d.bullet as bullet
 import panda3d.core as p3d
 
@@ -71,6 +72,26 @@ class GameApp(ShowBase):
 
         self.demon_manager = DemonManager(city, self.physics_world)
         self.taskMgr.add(self.demon_manager.update, 'Demon Manager')
+
+        resx = resy = 720
+        image = city.get_map(resx, resy)
+        texture = p3d.Texture()
+        texture.setup2dTexture(resx, resy,
+                                p3d.Texture.T_unsigned_byte,
+                                p3d.Texture.F_rgba8)
+        texture.set_ram_image(image)
+        self.map_texture = texture
+        self.map_gui = None
+
+        def toggle_map(display):
+            if display:
+                self.map_gui = dgui.OnscreenImage.OnscreenImage(texture, scale=0.9)
+                self.map_gui.set_transparency(p3d.TransparencyAttrib.M_alpha)
+            elif self.map_gui:
+                self.map_gui.destroy()
+
+        self.accept('display_map', toggle_map, [True])
+        self.accept('display_map-up', toggle_map, [False])
 
     def create_mesh(self, mesh, name, material):
             node = p3d.GeomNode(name)

@@ -1,9 +1,11 @@
-import random
+import ctypes
 import itertools
+import random
 
 
 RESOURCE_TYPES = [
     "NONE",
+    "EMPTY",
     "ALPHA",
     "BETA",
     "GAMMA",
@@ -11,6 +13,7 @@ RESOURCE_TYPES = [
 
 
 RESOURCE_WEIGHTS = [
+    0.0,
     0.85,
     0.05,
     0.05,
@@ -37,6 +40,9 @@ class City(object):
         self.materials = []
         self.spawn_points = []
         self.road_mesh = None
+
+    def get_map(self, resolution_x, resolution_y):
+        return gen_map(self, resolution_x, resolution_y)
 
 
 class Building(object):
@@ -75,6 +81,9 @@ class CityGen(object):
 
     def dump_obj(self, path, name):
         write_obj(self.city, path, name)
+
+    def get_map(self, resx, resy):
+        return gen_map(self, resx, resy)
 
 
 def create_lots(lot, block):
@@ -246,11 +255,58 @@ def gen_city(city_width=500, city_height=500, lane_width=6, block_width=80, bloc
         mesh = Mesh(verts, faces)
         city.meshes.append(mesh)
         collision = ((lot[2]-lot[0])/2.0, (lot[3] - lot[1])/2.0, height/2.0)
-        resource = weighted_choice(RESOURCE_TYPES, RESOURCE_WEIGHTS)
-        print(resource)
+        if lot[0] < vert_roads[0] + x_offset or lot[2] > vert_roads[-2] + x_offset:
+            resource = "NONE"
+        elif lot[1] < hor_roads[0] + y_offset or lot[3] > hor_roads[-2] + y_offset:
+            resource = "NONE"
+        else:
+            resource = weighted_choice(RESOURCE_TYPES, RESOURCE_WEIGHTS)
         city.buildings.append(Building(pos, mesh, collision, resource))
 
     return city
+
+
+def gen_map(city, resx, resy):
+    img_data = (ctypes.c_ubyte * (4 * resx * resy))(*([0, 0, 0, 0] * (resx * resy)))
+
+    city_width = city_height = 500.0
+    x_off = city_width / 2.0
+    y_off = city_height / 2.0
+    w_ratio = resx / city_width
+    h_ratio = resy / city_height
+
+    for building in city.buildings:
+        x1 = int((building.position[0] - building.collision[0] + x_off) * w_ratio)
+        x2 = int((building.position[0] + building.collision[0] + x_off) * w_ratio)
+        y1 = int((building.position[1] - building.collision[1] + y_off) * h_ratio)
+        y2 = int((building.position[1] + building.collision[1] + y_off) * h_ratio)
+
+        for y in range(y1, y2):
+            for x in range(x1, x2):
+                i = y * (resy*4) + x*4
+
+                a = 128
+                if x <= x1 + 0 or x >= x2 - 1 - 0:
+                    r, g, b, = (0, 0, 0)
+                elif y <= y1 + 0 or y >= y2 - 1 - 0:
+                    r, g, b, = (0, 0, 0)
+                elif building.resource == "ALPHA":
+                    r, g, b = (255, 0, 0)
+                elif building.resource == "BETA":
+                    r, g, b = (0, 0, 255)
+                elif building.resource == "GAMMA":
+                    r, g, b = (0, 255, 0)
+                elif building.resource == "NONE":
+                    r, g, b, a = (225, 225, 225, 128)
+                else:
+                    r, g, b = (64, 64, 64)
+
+                img_data[i+0] = b
+                img_data[i+1] = g
+                img_data[i+2] = r
+                img_data[i+3] = a
+
+    return img_data
 
 
 def write_obj(city, path, name):
