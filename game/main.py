@@ -209,7 +209,8 @@ class GameApp(ShowBase):
 
             node = bullet.BulletRigidBodyNode(name)
             node.add_shape(bullet.BulletBoxShape(p3d.Vec3(building.collision)))
-            node.set_python_tag('building', building)
+            if building.resource != "NONE":
+                node.set_python_tag('building', building)
             np = self.render.attach_new_node(node)
             pos = list(building.position)
             pos[2] += building.collision[2]
