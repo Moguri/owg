@@ -46,13 +46,15 @@ class City(object):
 
 
 class Building(object):
-    __slots__ = ["position", "mesh", "collision", "resource"]
+    __slots__ = ["position", "mesh", "collision", "resource", "nodepath", "owner"]
 
     def __init__(self, position, mesh, collision, resource):
         self.position = position
         self.mesh = mesh
         self.collision = collision
         self.resource = resource
+        self.nodepath = None
+        self.owner = None
 
 
 class Mesh(object):

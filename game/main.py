@@ -39,6 +39,10 @@ class GameApp(ShowBase):
         wp.set_size(*win_size)
         self.openDefaultWindow(props=wp)
 
+        # Don't send compound events with modifiers (e.g., send 'shift' and 'a' instead of 'shift-a')
+        self.mouseWatcherNode.set_modifier_buttons(p3d.ModifierButtons())
+        self.buttonThrowers[0].node().set_modifier_buttons(p3d.ModifierButtons())
+
         self.physics_world = bullet.BulletWorld()
         self.physics_world.set_gravity(p3d.Vec3(0, 0, -9.81))
         self.taskMgr.add(self.update_physics, 'Update Physics')
@@ -200,9 +204,11 @@ class GameApp(ShowBase):
             mat = random.choice(building_mats)
             np = self.create_mesh(mesh, name, mat)
             np.set_pos(p3d.VBase3(*building.position))
+            building.nodepath = np
 
             node = bullet.BulletRigidBodyNode(name)
             node.add_shape(bullet.BulletBoxShape(p3d.Vec3(building.collision)))
+            node.set_python_tag('building', building)
             np = self.render.attach_new_node(node)
             pos = list(building.position)
             pos[2] += building.collision[2]

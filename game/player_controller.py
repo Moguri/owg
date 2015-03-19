@@ -29,6 +29,10 @@ class PlayerController(DirectObject):
         self.player_movement = p3d.Vec3(0, 0, 0)
         self.player_speed = 10
 
+        # Building acquisition
+        self.in_buy_mode = False
+        self.current_building = None
+
         self.accept('move_forward', self.update_movement, ['forward', True])
         self.accept('move_forward-up', self.update_movement, ['forward', False])
         self.accept('move_backward', self.update_movement, ['backward', True])
@@ -39,6 +43,9 @@ class PlayerController(DirectObject):
         self.accept('move_right-up', self.update_movement, ['right', False])
         self.accept('jump', self.jump)
         self.accept('fire', self.fire)
+        self.accept('purchase', self.purchase_building)
+        self.accept('buy_mode', lambda: setattr(self, 'in_buy_mode', True))
+        self.accept('buy_mode-up', lambda: setattr(self, 'in_buy_mode', False))
 
     def update_movement(self, direction, activate):
         move_delta = p3d.Vec3(0, 0, 0)
@@ -61,7 +68,7 @@ class PlayerController(DirectObject):
         if self.player.is_on_ground():
             self.player.do_jump()
 
-    def fire(self):
+    def _get_object_at_cursor(self):
         from_point = p3d.Point3()
         to_point = p3d.Point3()
         base.camLens.extrude(p3d.Point2(0, 0), from_point, to_point)
@@ -69,12 +76,22 @@ class PlayerController(DirectObject):
         from_point = base.render.get_relative_point(base.camera, from_point)
         to_point = base.render.get_relative_point(base.camera, to_point)
 
-        result = base.physics_world.ray_test_closest(from_point, to_point)
+        return base.physics_world.ray_test_closest(from_point, to_point)
+
+    def fire(self):
+        result = self._get_object_at_cursor()
 
         node = result.get_node()
         if (node and node.get_python_tag('character_id')):
             cid = node.get_python_tag('character_id')
             base.messenger.send('character_hit', [cid])
+
+    def purchase_building(self):
+        if self.in_buy_mode and self.current_building:
+            print('BUYING', self.current_building.resource)
+            self.current_building.owner = 'PLAYER'
+            self.current_building.nodepath.set_color_scale(0, 0, 10, 1)
+            self.current_building = None
 
     def update(self, task):
         # Update movement
@@ -104,4 +121,22 @@ class PlayerController(DirectObject):
 
         base.camera.set_hpr(self.player.get_hpr())
         base.camera.set_p(self.camera_pitch)
+
+        # Highlight buildings when in buy_mode:
+        if self.in_buy_mode:
+            result = self._get_object_at_cursor().get_node()
+            building = None
+
+            if result and result.get_python_tag('building'):
+                building = result.get_python_tag('building')
+
+            if building and not building.owner and building != self.current_building:
+                if self.current_building:
+                    self.current_building.nodepath.clear_color_scale()
+                self.current_building = building
+                self.current_building.nodepath.set_color_scale(2, 0, 0, 1)
+                print("BUY {}?".format(building.resource))
+        elif self.current_building:
+            self.current_building.nodepath.clear_color_scale()
+            self.current_building = None
         return task.cont
