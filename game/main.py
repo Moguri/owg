@@ -113,7 +113,8 @@ class GameApp(ShowBase):
         if not os.path.exists(config_path):
             print('Creating new user_config.prc')
             config_page = p3d.load_prc_file_data('user_config.prc', '')
-        config_page = p3d.load_prc_file('user_config.prc')
+        else:
+            config_page = p3d.load_prc_file('user_config.prc')
 
         # Check for missing defaults
         win_size = self.pipe.get_display_width(), self.pipe.get_display_height()
