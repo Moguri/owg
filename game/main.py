@@ -3,11 +3,13 @@ from __future__ import print_function
 
 import random
 import os
+import atexit
 
-from direct.showbase.ShowBase import ShowBase
 import direct.gui as dgui
 import panda3d.bullet as bullet
 import panda3d.core as p3d
+p3d.load_prc_file_data('', 'window-type none')
+from direct.showbase.ShowBase import ShowBase
 
 from citygen import *
 
@@ -21,14 +23,21 @@ class GameApp(ShowBase):
 
     def __init__(self):
         ShowBase.__init__(self)
+        self.makeDefaultPipe()
 
         self.app_dir = os.path.dirname(os.path.abspath(__file__))
+        self.setup_user_config()
+
         self.input_mapper = inputmapper.InputMapper(os.path.join(self.app_dir, 'input.conf'))
         self.disableMouse()
+
         wp = p3d.WindowProperties()
         wp.set_cursor_hidden(True)
         wp.set_mouse_mode(p3d.WindowProperties.MRelative)
-        self.win.requestProperties(wp)
+        win_size_config = p3d.ConfigVariable('win-size')
+        win_size = [win_size_config.get_int_word(0), win_size_config.get_int_word(1)]
+        wp.set_size(*win_size)
+        self.openDefaultWindow(props=wp)
 
         self.physics_world = bullet.BulletWorld()
         self.physics_world.set_gravity(p3d.Vec3(0, 0, -9.81))
@@ -92,6 +101,55 @@ class GameApp(ShowBase):
 
         self.accept('display_map', toggle_map, [True])
         self.accept('display_map-up', toggle_map, [False])
+
+    def setup_user_config(self):
+        # TODO this should probably go in a user directory
+        config_path = os.path.join(self.app_dir, 'user_config.prc')
+
+        if not os.path.exists(config_path):
+            print('Creating new user_config.prc')
+            config_page = p3d.load_prc_file_data('user_config.prc', '')
+        config_page = p3d.load_prc_file('user_config.prc')
+
+        # Check for missing defaults
+        win_size = self.pipe.get_display_width(), self.pipe.get_display_height()
+        defaults = {
+                'win-size': '{} {}'.format(*win_size),
+                'fullscreen': '#t',
+                'mousex-sensitivity': '100',
+                'mousey-sensitivity': '100',
+        }
+        found = set()
+
+        decls = [config_page.get_declaration(i) for i in range(config_page.get_num_declarations())]
+        for decl in decls:
+            decl_var = decl.get_variable()
+            decl_name = decl_var.get_name()
+            if decl_name in defaults:
+                # print('Found config variable', decl_name)
+                found.add(decl_name)
+                if not decl_var.get_default_value():
+                    decl_var.set_default_value(decl.get_string_value())
+
+        # print('found set', found)
+        # print('missing set', frozenset(defaults.keys()) - found)
+        for i in frozenset(defaults.keys()) - found:
+            print('Adding default to user-config:', i, defaults[i])
+            decl = config_page.make_declaration(i, defaults[i])
+            decl_var = decl.get_variable()
+            if not decl_var.get_default_value():
+                decl_var.set_default_value(defaults[i])
+
+
+        def write_config():
+            print('writing user-config to disk')
+            # Write the config file to disk
+            config_stream = p3d.OFileStream(config_path)
+            for i in '# This file is auto-generated\n':
+                config_stream.put(ord(i))
+            config_page.write(config_stream)
+            config_stream.close()
+        atexit.register(write_config)
 
     def create_mesh(self, mesh, name, material):
             node = p3d.GeomNode(name)
@@ -170,6 +228,5 @@ class GameApp(ShowBase):
 
 
 if __name__ == '__main__':
-    p3d.load_prc_file('user_config.prc')
     app = GameApp()
     app.run()
