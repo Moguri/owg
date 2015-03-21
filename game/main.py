@@ -86,22 +86,13 @@ class GameApp(ShowBase):
         self.demon_manager = DemonManager(city, self.physics_world)
         self.taskMgr.add(self.demon_manager.update, 'Demon Manager')
 
-        resx = resy = 720
-        image = city.get_map(resx, resy)
-        texture = p3d.Texture()
-        texture.setup2dTexture(resx, resy,
-                                p3d.Texture.T_unsigned_byte,
-                                p3d.Texture.F_rgba8)
-        texture.set_ram_image(image)
-        self.map_texture = texture
-        self.map_gui = None
+        self.city_map = citygen.CityMap(city)
 
         def toggle_map(display):
             if display:
-                self.map_gui = dgui.OnscreenImage.OnscreenImage(texture, scale=0.9)
-                self.map_gui.set_transparency(p3d.TransparencyAttrib.M_alpha)
-            elif self.map_gui:
-                self.map_gui.destroy()
+                self.city_map.show()
+            else:
+                self.city_map.hide()
 
         self.accept('display_map', toggle_map, [True])
         self.accept('display_map-up', toggle_map, [False])

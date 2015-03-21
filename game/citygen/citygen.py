@@ -14,7 +14,8 @@ def weighted_choice(choices):
 
 
 class City(object):
-    __slots__ = ["buildings", "road_mesh", "spawn_points", "meshes", "materials"]
+    __slots__ = ["buildings", "road_mesh", "spawn_points", "meshes",
+                 "materials", "width", "height"]
 
     def __init__(self):
         self.buildings = []
@@ -22,6 +23,8 @@ class City(object):
         self.materials = []
         self.spawn_points = []
         self.road_mesh = None
+        self.width = 0
+        self.height = 0
 
     def get_map(self, resolution_x, resolution_y):
         return gen_map(self, resolution_x, resolution_y)
@@ -65,6 +68,9 @@ def create_lots(lot, block):
 
 def gen_city(city_width=500, city_height=500, lane_width=6, block_width=80, block_height=80, block_var=0.25):
     city = City()
+    city.width = city_width
+    city.height = city_height
+
     x_off = city_width / 2.0
     y_off = city_height / 2.0
 
