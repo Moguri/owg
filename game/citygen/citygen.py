@@ -3,29 +3,28 @@ import itertools
 import random
 
 
-RESOURCE_TYPES = [
-    "NONE",
-    "EMPTY",
-    "ALPHA",
-    "BETA",
-    "GAMMA",
-]
+class ResourceData(object):
+    __slots__ = ["weight", "color"]
+
+    def __init__(self, weight, color):
+        self.weight = weight
+        self.color = color
 
 
-RESOURCE_WEIGHTS = [
-    0.0,
-    0.85,
-    0.05,
-    0.05,
-    0.05,
-]
+RESOURCES = {
+    "NONE": ResourceData(0.0, (32, 32, 32)),
+    "EMPTY": ResourceData(0.85, (170, 170, 170)),
+    "ALPHA": ResourceData(0.05, (170, 0, 0)),
+    "BETA": ResourceData(0.05, (0, 0, 170)),
+    "GAMMA": ResourceData(0.05, (0, 170, 0)),
+}
 
 
-def weighted_choice(choices, weights):
-    total = sum(weights)
+def weighted_choice(choices):
+    total = sum([i[1] for i in choices])
     r = random.uniform(0, total)
     i = 0
-    for choice, weight in itertools.izip(choices, weights):
+    for choice, weight in choices:
         if i + weight > r:
             return choice
         i += weight
@@ -187,6 +186,7 @@ def gen_city(city_width=500, city_height=500, lane_width=6, block_width=80, bloc
         lots += create_lots(block, block)
 
     # Buildings
+    resource_choices = [(key, value.weight) for key, value in RESOURCES.items()]
     for lot in lots:
         floors = random.randint(1, 5)
         height = floors * 4
@@ -262,7 +262,7 @@ def gen_city(city_width=500, city_height=500, lane_width=6, block_width=80, bloc
         elif lot[1] < hor_roads[0] + y_offset or lot[3] > hor_roads[-2] + y_offset:
             resource = "NONE"
         else:
-            resource = weighted_choice(RESOURCE_TYPES, RESOURCE_WEIGHTS)
+            resource = weighted_choice(resource_choices)
         city.buildings.append(Building(pos, mesh, collision, resource))
 
     return city
@@ -287,21 +287,15 @@ def gen_map(city, resx, resy):
             for x in range(x1, x2):
                 i = y * (resy*4) + x*4
 
-                a = 128
+                a = 160
                 if x <= x1 + 0 or x >= x2 - 1 - 0:
-                    r, g, b, = (0, 0, 0)
+                    r, g, b = (0, 0, 0)
                 elif y <= y1 + 0 or y >= y2 - 1 - 0:
-                    r, g, b, = (0, 0, 0)
-                elif building.resource == "ALPHA":
-                    r, g, b = (255, 0, 0)
-                elif building.resource == "BETA":
-                    r, g, b = (0, 0, 255)
-                elif building.resource == "GAMMA":
-                    r, g, b = (0, 255, 0)
-                elif building.resource == "NONE":
-                    r, g, b, a = (225, 225, 225, 128)
+                    r, g, b = (0, 0, 0)
+                elif building.owner and (x % 8 == 1 or y % 8 == 1):
+                    r, g, b = (255, 255, 255)
                 else:
-                    r, g, b = (64, 64, 64)
+                    r, g, b = RESOURCES[building.resource].color
 
                 img_data[i+0] = b
                 img_data[i+1] = g
