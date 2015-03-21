@@ -11,7 +11,7 @@ import panda3d.core as p3d
 p3d.load_prc_file_data('', 'window-type none')
 from direct.showbase.ShowBase import ShowBase
 
-from citygen import *
+import citygen
 
 import inputmapper
 import character
@@ -71,7 +71,7 @@ class GameApp(ShowBase):
         light_np.set_hpr(p3d.VBase3(45.0, 45.0, 0.0))
         self.render.set_light(light_np)
 
-        gen = CityGen()
+        gen = citygen.CityGen()
         gen.generate()
         city = gen.city
 
@@ -156,36 +156,6 @@ class GameApp(ShowBase):
             config_stream.close()
         atexit.register(write_config)
 
-    def create_mesh(self, mesh, name, material):
-            node = p3d.GeomNode(name)
-
-            vdata = p3d.GeomVertexData(name,
-                p3d.GeomVertexFormat.get_v3n3(),
-                p3d.GeomEnums.UH_stream)
-            vdata.unclean_set_num_rows(len(mesh.vertices))
-
-            vwriter = p3d.GeomVertexWriter(vdata, 'vertex')
-            nwriter = p3d.GeomVertexWriter(vdata, 'normal')
-            for vert in mesh.vertices:
-                vwriter.add_data3(*vert.position)
-                nwriter.add_data3(*vert.normal)
-            vwriter = None
-            nwriter = None
-
-            prim = p3d.GeomTriangles(p3d.GeomEnums.UH_stream)
-            for face in mesh.faces:
-                prim.add_vertices(*face)
-
-            render_state = p3d.RenderState.make_empty()
-
-            render_state = render_state.set_attrib(p3d.MaterialAttrib.make(material))
-
-            geom = p3d.Geom(vdata)
-            geom.add_primitive(prim)
-            node.add_geom(geom, render_state)
-
-            return self.render.attach_new_node(node)
-
     def import_city(self, city):
         colors = []
         colors.append((112, 163, 10))
@@ -203,7 +173,8 @@ class GameApp(ShowBase):
             mesh = building.mesh
             name = str(i)
             mat = random.choice(building_mats)
-            np = self.create_mesh(mesh, name, mat)
+            node = citygen.mesh_to_p3d_node(mesh, name, mat)
+            np = self.render.attach_new_node(node)
             np.set_pos(p3d.VBase3(*building.position))
             building.nodepath = np
 
@@ -221,7 +192,8 @@ class GameApp(ShowBase):
         road_mat.set_shininess(1.0)
         color = [c/255.0 for c in (7, 105, 105)]
         road_mat.set_diffuse(p3d.VBase4(color[0], color[1], color[2], 1.0))
-        self.create_mesh(city.road_mesh, "road", road_mat)
+        node = citygen.mesh_to_p3d_node(city.road_mesh, "road", road_mat)
+        self.render.attach_new_node(node)
 
         node = bullet.BulletRigidBodyNode('Ground')
         node.add_shape(bullet.BulletPlaneShape(p3d.Vec3(0, 0, 1), 0))
