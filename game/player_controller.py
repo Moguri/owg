@@ -1,6 +1,7 @@
 from direct.showbase.DirectObject import DirectObject
-from direct.gui.OnscreenImage import OnscreenImage
 import panda3d.core as p3d
+
+from hud import Hud
 
 
 class PlayerController(DirectObject):
@@ -10,11 +11,7 @@ class PlayerController(DirectObject):
 
         self.player = player
 
-        # Crosshair
-        self.crosshair = OnscreenImage(image='crosshair.png',
-                                       scale=(0.1, 0, 0.1),
-                                       pos=(0, 0, 0))
-        self.crosshair.set_transparency(p3d.TransparencyAttrib.MAlpha)
+        self.hud = Hud()
 
         halfx = base.win.get_x_size() / 2
         halfy = base.win.get_y_size() / 2
@@ -32,6 +29,12 @@ class PlayerController(DirectObject):
         # Building acquisition
         self.in_buy_mode = False
         self.current_building = None
+        self.resources = {
+                'ALPHA': 0,
+                'BETA': 0,
+                'GAMMA': 0,
+                'EMPTY': 0,
+        }
 
         self.accept('move_forward', self.update_movement, ['forward', True])
         self.accept('move_forward-up', self.update_movement, ['forward', False])
@@ -91,6 +94,7 @@ class PlayerController(DirectObject):
             print('BUYING', self.current_building.resource)
             self.current_building.owner = 'PLAYER'
             self.current_building.nodepath.set_color_scale(0, 0, 10, 1)
+            self.resources[self.current_building.resource] += 1
             self.current_building = None
 
     def update(self, task):
@@ -139,4 +143,6 @@ class PlayerController(DirectObject):
         elif self.current_building:
             self.current_building.nodepath.clear_color_scale()
             self.current_building = None
+
+        self.hud.update(self)
         return task.cont
