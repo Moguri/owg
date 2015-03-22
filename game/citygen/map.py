@@ -25,6 +25,9 @@ in vec3 var_barycentric;
 
 uniform vec3 color;
 
+uniform bool has_owner;
+uniform vec3 owner_color;
+
 float edgeFactor(){
     vec2 d = fwidth(var_barycentric.xz);
     vec2 a2 = smoothstep(vec2(0.0), d*1.5, var_barycentric.xz);
@@ -33,7 +36,11 @@ float edgeFactor(){
 
 void main()
 {
-    gl_FragColor.rgb = mix(vec3(0.0), color, edgeFactor());
+    vec3 out_color = color;
+    if (has_owner && var_barycentric.x < 0.5 && var_barycentric.z < 0.5)
+        out_color = owner_color;
+    out_color = mix(vec3(0.0), out_color, edgeFactor());
+    gl_FragColor.rgb = out_color;
     gl_FragColor.a = 0.75;
 }
 """
@@ -97,6 +104,13 @@ class CityMap(object):
                 color = RESOURCES[building.resource].color
                 color = [c/255.0 for c in color]
                 np.set_shader_input("color", p3d.VBase3F(*color))
+
+                if building.owner:
+                    np.set_shader_input("has_owner", True)
+                    np.set_shader_input("owner_color", p3d.VBase3F(1, 1, 1))
+                else:
+                    np.set_shader_input("has_owner", False)
+                    np.set_shader_input("owner_color", p3d.VBase3F(1, 1, 1))
 
             pos = base.player_controller.player.get_pos()
             pos[0] /= self.city.width * 0.5
