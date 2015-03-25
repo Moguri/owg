@@ -1,6 +1,7 @@
 from panda3d.bullet import BulletCharacterControllerNode
 from panda3d.bullet import BulletCapsuleShape
 from panda3d.bullet import ZUp
+import panda3d.core as p3d
 from direct.showbase.DirectObject import DirectObject
 
 
@@ -11,6 +12,7 @@ class Character(DirectObject):
         self.hp = 1
         self.id = Character.next_id
         Character.next_id += 1
+        self.linear_movement = p3d.Vec3(0.0)
 
         # Setup physics
         shape = BulletCapsuleShape(radius, height - 2 * radius, ZUp)
@@ -44,8 +46,12 @@ class Character(DirectObject):
     def get_hpr(self):
         return self.nodepath.get_hpr()
 
+    def get_linear_movement(self):
+        return self.linear_movement
+
     def set_linear_movement(self, movement, local=True):
         self.physics_node.set_linear_movement(movement, local)
+        self.linear_movement = movement
 
     def set_angular_movement(self, movement):
         self.physics_node.set_angular_movement(movement)
