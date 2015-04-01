@@ -148,22 +148,21 @@ class GameApp(ShowBase):
         atexit.register(write_config)
 
     def import_city(self, city):
-        colors = []
-        colors.append((112, 163, 10))
-        colors.append((90, 135, 10))
-        colors.append((67, 100, 10))
-        building_mats = []
-        for color in colors:
-            mat = p3d.Material()
-            mat.set_shininess(1.0)
-            color = [c/255.0 for c in color]
-            mat.set_diffuse(p3d.VBase4(color[0], color[1], color[2], 1.0))
-            building_mats.append(mat)
+        building_mats = {}
+        for resource, data in citygen.RESOURCES.items():
+            mat_set = []
+            for factor in (0.8, 1.0, 1.2):
+                mat = p3d.Material()
+                mat.set_shininess(1.0)
+                adj_color = [min(c*factor/255.0, 1.0) for c in data.color]
+                mat.set_diffuse(p3d.VBase4(adj_color[0], adj_color[1], adj_color[2], 1.0))
+                mat_set.append(mat)
+            building_mats[resource] = mat_set
 
         for i, building in enumerate(city.buildings):
             mesh = building.mesh
             name = str(i)
-            mat = random.choice(building_mats)
+            mat = random.choice(building_mats[building.resource])
             node = citygen.mesh_to_p3d_node(mesh, name, mat)
             np = self.render.attach_new_node(node)
             np.set_pos(p3d.VBase3(*building.position))
