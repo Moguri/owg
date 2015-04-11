@@ -11,13 +11,26 @@ DEMON_SPEED = 0.75
 
 
 class DemonPortal(object):
-    __slots__ = ["position", "time_to_spawn", "demons"]
+    __slots__ = [
+            "position",
+            "time_to_spawn",
+            "demons",
+            "demons_destroyed",
+            "node_path"
+    ]
 
     def __init__(self, position):
         self.position = position
         self.time_to_spawn = 0
         self.new_time()
         self.demons = []
+        self.demons_destroyed = 0
+        self.node_path = None
+
+    def destroy(self):
+        self.node_path.remove_node()
+        for demon in self.demons:
+            demon.destroy()
 
     def new_time(self):
         self.time_to_spawn = random.uniform(5, 10)
@@ -39,15 +52,17 @@ class DemonManager(object):
         for portal in self.demon_portals:
             placeholder = base.render.attach_new_node("placeholder")
             placeholder.set_pos(portal.position)
+            portal.node_path = placeholder
             self.portal_model.instance_to(placeholder)
 
     def update(self, task):
         dt = globalClock.getDt()
-        for portal in self.demon_portals:
+        for portal in self.demon_portals[:]:
             for demon in portal.demons[:]:
                 if demon.hp <= 0:
                     demon.destroy()
                     portal.demons.remove(demon)
+                    portal.demons_destroyed += 1
                     continue
 
                 r = (random.random() - random.random()) * (math.pi / 12.0)
@@ -58,6 +73,11 @@ class DemonManager(object):
                 movement.normalize()
                 movement *= DEMON_SPEED
                 demon.set_linear_movement(movement, local=False)
+
+            if portal.demons_destroyed >= 5:
+                portal.destroy()
+                self.demon_portals.remove(portal)
+                continue
 
             if len(portal.demons) >= 5:
                 continue
