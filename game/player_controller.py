@@ -50,6 +50,10 @@ class PlayerController(DirectObject):
         self.accept('buy_mode', lambda: setattr(self, 'in_buy_mode', True))
         self.accept('buy_mode-up', lambda: setattr(self, 'in_buy_mode', False))
 
+    def destroy(self):
+        self.ignoreAll()
+        self.player.destroy()
+
     def update_movement(self, direction, activate):
         move_delta = p3d.Vec3(0, 0, 0)
 

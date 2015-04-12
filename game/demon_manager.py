@@ -55,6 +55,12 @@ class DemonManager(object):
             portal.node_path = placeholder
             self.portal_model.instance_to(placeholder)
 
+    def destroy(self):
+        for portal in self.demon_portals:
+            for demon in portal.demons:
+                demon.destroy()
+            portal.destroy()
+
     def update(self, task):
         dt = globalClock.getDt()
         for portal in self.demon_portals[:]:

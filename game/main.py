@@ -1,22 +1,17 @@
 #!/usr/bin/env python2
 from __future__ import print_function
 
-import random
 import os
 import atexit
 
 import direct.gui as dgui
-import panda3d.bullet as bullet
 import panda3d.core as p3d
+import panda3d.bullet as bullet
 p3d.load_prc_file_data('', 'window-type none')
 from direct.showbase.ShowBase import ShowBase
 
-import citygen
-
 import inputmapper
-import character
-from player_controller import PlayerController
-from demon_manager import DemonManager
+from game_states import MainState
 
 
 class GameApp(ShowBase):
@@ -45,12 +40,12 @@ class GameApp(ShowBase):
 
         self.physics_world = bullet.BulletWorld()
         self.physics_world.set_gravity(p3d.Vec3(0, 0, -9.81))
-        self.taskMgr.add(self.update_physics, 'Update Physics')
+        base.taskMgr.add(self.update_physics, 'Update Physics')
 
         phydebug = bullet.BulletDebugNode('Physics Debug')
         phydebug.show_wireframe(True)
         phydebug.show_bounding_boxes(True)
-        phydebugnp = self.render.attach_new_node(phydebug)
+        phydebugnp = base.render.attach_new_node(phydebug)
         # Uncomment to show debug physics
         # phydebugnp.show()
         self.physics_world.set_debug_node(phydebug)
@@ -71,31 +66,18 @@ class GameApp(ShowBase):
         light_np.set_hpr(p3d.VBase3(45.0, 45.0, 0.0))
         self.render.set_light(light_np)
 
-        gen = citygen.CityGen()
-        gen.generate()
-        city = gen.city
-
-        self.import_city(city)
-        player_spawn = random.choice(city.spawn_points)
-
-        player = character.Character('player', self.render, 1.75, 0.6)
-        player.set_pos(player_spawn)
-        self.player_controller = PlayerController(player)
-        self.taskMgr.add(self.player_controller.update, 'Player Controller')
-
-        self.demon_manager = DemonManager(city, self.physics_world)
-        self.taskMgr.add(self.demon_manager.update, 'Demon Manager')
-
-        self.city_map = citygen.CityMap(city)
-
-        def toggle_map(display):
-            if display:
-                self.city_map.show()
-            else:
-                self.city_map.hide()
-
-        self.accept('display_map', toggle_map, [True])
-        self.accept('display_map-up', toggle_map, [False])
+        self.state = MainState()
+        def restart_state():
+            self.state.destroy()
+            #print(self.render.ls())
+            #print("Num characters:", self.physics_world.get_num_characters())
+            #print("Num ghosts:", self.physics_world.get_num_ghosts())
+            #print("Num manifolds:", self.physics_world.get_num_manifolds())
+            #print("Num rigid bodies:", self.physics_world.get_num_rigid_bodies())
+            #print("Num soft bodies:", self.physics_world.get_num_soft_bodies())
+            #print("Num vehicles:", self.physics_world.get_num_vehicles())
+            self.state = MainState()
+        self.accept('restart_state', restart_state)
 
     def setup_user_config(self):
         # TODO this should probably go in a user directory
@@ -146,49 +128,6 @@ class GameApp(ShowBase):
             config_page.write(config_stream)
             config_stream.close()
         atexit.register(write_config)
-
-    def import_city(self, city):
-        building_mats = {}
-        for resource, data in citygen.RESOURCES.items():
-            mat_set = []
-            for factor in (0.8, 1.0, 1.2):
-                mat = p3d.Material()
-                mat.set_shininess(1.0)
-                adj_color = [min(c*factor/255.0, 1.0) for c in data.color]
-                mat.set_diffuse(p3d.VBase4(adj_color[0], adj_color[1], adj_color[2], 1.0))
-                mat_set.append(mat)
-            building_mats[resource] = mat_set
-
-        for i, building in enumerate(city.buildings):
-            mesh = building.mesh
-            name = str(i)
-            mat = random.choice(building_mats[building.resource])
-            node = citygen.mesh_to_p3d_node(mesh, name, mat)
-            np = self.render.attach_new_node(node)
-            np.set_pos(p3d.VBase3(*building.position))
-            building.nodepath = np
-
-            node = bullet.BulletRigidBodyNode(name)
-            node.add_shape(bullet.BulletBoxShape(p3d.Vec3(building.collision)))
-            if building.resource != "NONE":
-                node.set_python_tag('building', building)
-            np = self.render.attach_new_node(node)
-            pos = list(building.position)
-            pos[2] += building.collision[2]
-            np.set_pos(p3d.VBase3(*pos))
-            self.physics_world.attach_rigid_body(node)
-
-        road_mat = p3d.Material()
-        road_mat.set_shininess(1.0)
-        color = [c/255.0 for c in (7, 105, 105)]
-        road_mat.set_diffuse(p3d.VBase4(color[0], color[1], color[2], 1.0))
-        node = citygen.mesh_to_p3d_node(city.road_mesh, "road", road_mat)
-        self.render.attach_new_node(node)
-
-        node = bullet.BulletRigidBodyNode('Ground')
-        node.add_shape(bullet.BulletPlaneShape(p3d.Vec3(0, 0, 1), 0))
-        self.render.attach_new_node(node)
-        self.physics_world.attach_rigid_body(node)
 
     # Tasks
     def update_physics(self, task):
