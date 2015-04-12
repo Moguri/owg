@@ -41,10 +41,7 @@ class DemonManager(object):
         self.city = city
         self.physics_world = physics_world
 
-        self.demon_model = base.loader.loadModel("models/demon.egg")
-        bounds = self.demon_model.get_tight_bounds()
-        self.demon_model_half_height = (bounds[1] - bounds[0]).z / 2.0
-        self.portal_model = base.loader.loadModel("models/demon_portal.egg")
+        self.portal_model = base.loader.loadModel("models/demon_portal")
 
         portal_positions = random.sample(city.spawn_points, 5)
         self.demon_portals = [DemonPortal(i) for i in portal_positions]
@@ -92,7 +89,7 @@ class DemonManager(object):
             if portal.time_to_spawn < 0:
                 portal.new_time()
 
-                demon = Character("Demon", base.render, 1.75, 0.6)
+                demon = Character('demon')
 
                 # Position the new demon
                 pos = p3d.Vec3(portal.position)
@@ -106,12 +103,6 @@ class DemonManager(object):
                 ori = random.random() * math.pi * 2.0
                 movement = p3d.Vec3(math.cos(ori), math.sin(ori), 0) * DEMON_SPEED
                 demon.set_linear_movement(movement, local=False)
-
-                # Attach a mesh
-                np = self.demon_model.instance_under_node(demon.nodepath, 'demon_mesh')
-                pos = np.get_pos()
-                pos.z -= self.demon_model_half_height
-                np.set_pos(pos)
 
                 portal.demons.append(demon)
 

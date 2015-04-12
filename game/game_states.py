@@ -21,7 +21,7 @@ class MainState(DirectObject):
         self.import_city(city)
         player_spawn = random.choice(city.spawn_points)
 
-        player = character.Character('player', base.render, 1.75, 0.6)
+        player = character.Character('player')
         player.set_pos(player_spawn)
         self.player_controller = base.player_controller = PlayerController(player)
         base.taskMgr.add(self.player_controller.update, 'Player Controller')
