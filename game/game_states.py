@@ -23,7 +23,7 @@ class MainState(DirectObject):
 
         player = character.Character('player', base.render, 1.75, 0.6)
         player.set_pos(player_spawn)
-        self.player_controller = PlayerController(player)
+        self.player_controller = base.player_controller = PlayerController(player)
         base.taskMgr.add(self.player_controller.update, 'Player Controller')
 
         self.demon_manager = DemonManager(city, base.physics_world)
@@ -50,6 +50,7 @@ class MainState(DirectObject):
             base.physics_world.remove(body)
 
         self.player_controller.destroy()
+        del base.player_controller
         self.demon_manager.destroy()
         self.ignoreAll()
 
