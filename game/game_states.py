@@ -76,7 +76,7 @@ class MainState(DirectObject):
             building.nodepath = np
 
             node = bullet.BulletRigidBodyNode(name)
-            node.add_shape(bullet.BulletBoxShape(p3d.Vec3(building.collision)))
+            node.add_shape(bullet.BulletBoxShape(p3d.LVector3(building.collision)))
             if building.resource != "NONE":
                 node.set_python_tag('building', building)
             np = self.city_nodepath.attach_new_node(node)
@@ -93,6 +93,6 @@ class MainState(DirectObject):
         self.city_nodepath.attach_new_node(node)
 
         node = bullet.BulletRigidBodyNode('Ground')
-        node.add_shape(bullet.BulletPlaneShape(p3d.Vec3(0, 0, 1), 0))
+        node.add_shape(bullet.BulletPlaneShape(p3d.LVector3(0, 0, 1), 0))
         self.city_nodepath.attach_new_node(node)
         base.physics_world.attach_rigid_body(node)

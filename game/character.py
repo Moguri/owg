@@ -15,7 +15,7 @@ class Character(DirectObject):
     def __init__(self, cfile, root=None):
         self.id = Character.next_id
         Character.next_id += 1
-        self.linear_movement = p3d.Vec3(0.0)
+        self.linear_movement = p3d.LVector3(0.0)
 
         if root is None:
             root = base.render

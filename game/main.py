@@ -39,7 +39,7 @@ class GameApp(ShowBase):
         self.buttonThrowers[0].node().set_modifier_buttons(p3d.ModifierButtons())
 
         self.physics_world = bullet.BulletWorld()
-        self.physics_world.set_gravity(p3d.Vec3(0, 0, -9.81))
+        self.physics_world.set_gravity(p3d.LVector3(0, 0, -9.81))
         base.taskMgr.add(self.update_physics, 'Update Physics')
 
         phydebug = bullet.BulletDebugNode('Physics Debug')

@@ -23,7 +23,7 @@ class PlayerController(DirectObject):
 
         self.camera_pitch = 0
 
-        self.player_movement = p3d.Vec3(0, 0, 0)
+        self.player_movement = p3d.LVector3(0, 0, 0)
         self.player_speed = 10
 
         # Building acquisition
@@ -60,7 +60,7 @@ class PlayerController(DirectObject):
         self.player.destroy()
 
     def update_movement(self, direction, activate):
-        move_delta = p3d.Vec3(0, 0, 0)
+        move_delta = p3d.LVector3(0, 0, 0)
 
         if direction == 'forward':
             move_delta.set_y(1)
@@ -108,7 +108,7 @@ class PlayerController(DirectObject):
 
     def update(self, task):
         # Update movement
-        movement = p3d.Vec3(self.player_movement)
+        movement = p3d.LVector3(self.player_movement)
         movement.normalize()
         movement *= self.player_speed
         self.player.set_linear_movement(movement)

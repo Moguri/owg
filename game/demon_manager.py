@@ -72,7 +72,7 @@ class DemonManager(object):
                 (old_x, old_y, old_z) = demon.get_linear_movement()
                 x = old_x * math.cos(r) - old_y * math.sin(r)
                 y = old_x * math.sin(r) + old_y * math.cos(r)
-                movement = p3d.Vec3(x, y, 0)
+                movement = p3d.LVector3(x, y, 0)
                 movement.normalize()
                 movement *= DEMON_SPEED
                 demon.set_linear_movement(movement, local=False)
@@ -92,16 +92,16 @@ class DemonManager(object):
                 demon = Character('demon')
 
                 # Position the new demon
-                pos = p3d.Vec3(portal.position)
+                pos = p3d.LVector3(portal.position)
                 # x = random.random() * 2.0 - 1.0
                 # y = random.random() * 2.0 - 1.0
-                # offset = p3d.Vec3(x, y, 0)
+                # offset = p3d.LVector3(x, y, 0)
                 # pos += offset * 0.0
                 demon.set_pos(pos)
 
                 # Get the demon moving
                 ori = random.random() * math.pi * 2.0
-                movement = p3d.Vec3(math.cos(ori), math.sin(ori), 0) * DEMON_SPEED
+                movement = p3d.LVector3(math.cos(ori), math.sin(ori), 0) * DEMON_SPEED
                 demon.set_linear_movement(movement, local=False)
 
                 portal.demons.append(demon)
