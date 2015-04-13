@@ -11,7 +11,7 @@ class InputMapper(DirectObject):
         with open(config) as f:
             for ln in f.readlines():
                 ln = ln.strip()
-                if not ln.startswith(';'):
+                if ln and not ln.startswith(';'):
                     ln = ln.split('=')
                     triggers = [i.strip() for i in ln[1].strip().split(',')]
                     event = ln[0].strip()
