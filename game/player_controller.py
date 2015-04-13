@@ -10,6 +10,7 @@ class PlayerController(DirectObject):
         DirectObject.__init__(self)
 
         self.player = player
+        self.player.hp = self.player.max_hp = 5
 
         self.hud = Hud()
 
@@ -49,6 +50,11 @@ class PlayerController(DirectObject):
         self.accept('purchase', self.purchase_building)
         self.accept('buy_mode', lambda: setattr(self, 'in_buy_mode', True))
         self.accept('buy_mode-up', lambda: setattr(self, 'in_buy_mode', False))
+
+        # DEBUG PC HEALTH
+        def damage_health():
+            base.messenger.send('character_hit', [self.player.id])
+        self.accept('pc_health', damage_health)
 
     def destroy(self):
         self.ignoreAll()

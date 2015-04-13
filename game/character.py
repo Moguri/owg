@@ -13,7 +13,7 @@ class Character(DirectObject):
     model_cache = {}
 
     def __init__(self, cfile, root=None):
-        self.hp = 1
+        self.max_hp = self.hp = 1
         self.id = Character.next_id
         Character.next_id += 1
         self.linear_movement = p3d.Vec3(0.0)
