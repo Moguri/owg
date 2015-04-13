@@ -13,7 +13,6 @@ class Character(DirectObject):
     model_cache = {}
 
     def __init__(self, cfile, root=None):
-        self.max_hp = self.hp = 1
         self.id = Character.next_id
         Character.next_id += 1
         self.linear_movement = p3d.Vec3(0.0)
@@ -24,6 +23,7 @@ class Character(DirectObject):
         with open(os.path.join('characters', cfile) + '.json') as f:
             self.json_data = json.load(f)
 
+        self.hp = self.max_hp = self.json_data['max_health']
         name = self.json_data['name']
         height = self.json_data['height']
         radius  =self.json_data['radius']

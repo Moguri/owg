@@ -10,7 +10,6 @@ class PlayerController(DirectObject):
         DirectObject.__init__(self)
 
         self.player = player
-        self.player.hp = self.player.max_hp = 5
 
         self.hud = Hud()
 
