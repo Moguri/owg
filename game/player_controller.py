@@ -2,6 +2,7 @@ from direct.showbase.DirectObject import DirectObject
 import panda3d.core as p3d
 
 from hud import Hud
+from weapon import Weapon
 
 
 class PlayerController(DirectObject):
@@ -38,6 +39,9 @@ class PlayerController(DirectObject):
                 'EMPTY': 0,
         }
 
+        self.left_weapon = Weapon('rifle')
+        self.right_weapon = Weapon('melee')
+
         self.accept('move_forward', self.update_movement, ['forward', True])
         self.accept('move_forward-up', self.update_movement, ['forward', False])
         self.accept('move_backward', self.update_movement, ['backward', True])
@@ -47,7 +51,8 @@ class PlayerController(DirectObject):
         self.accept('move_right', self.update_movement, ['right', True])
         self.accept('move_right-up', self.update_movement, ['right', False])
         self.accept('jump', self.jump)
-        self.accept('fire', self.fire)
+        self.accept('left_fire', self.fire, [self.left_weapon])
+        self.accept('right_fire', self.fire, [self.right_weapon])
         self.accept('purchase', self.purchase_building)
         self.accept('buy_mode', lambda: setattr(self, 'in_buy_mode', True))
         self.accept('buy_mode-up', lambda: setattr(self, 'in_buy_mode', False))
@@ -94,8 +99,8 @@ class PlayerController(DirectObject):
 
         return base.physics_world.ray_test_closest(from_point, to_point)
 
-    def fire(self):
-        result = self._get_object_at_cursor(100)
+    def fire(self, weapon):
+        result = self._get_object_at_cursor(weapon.range)
 
         node = result.get_node()
         if (node and node.get_python_tag('character_id')):
