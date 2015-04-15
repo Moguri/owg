@@ -26,7 +26,7 @@ class Character(DirectObject):
         self.hp = self.max_hp = self.json_data['max_health']
         name = self.json_data['name']
         height = self.json_data['height']
-        radius  =self.json_data['radius']
+        radius = self.json_data['radius']
 
         # Setup physics
         shape = BulletCapsuleShape(radius, height - 2 * radius, ZUp)
