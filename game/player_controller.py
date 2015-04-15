@@ -6,6 +6,8 @@ from hud import Hud
 
 class PlayerController(DirectObject):
 
+    BUY_DISTANCE = 50
+
     def __init__(self, player):
         DirectObject.__init__(self)
 
@@ -80,10 +82,12 @@ class PlayerController(DirectObject):
         if self.player.is_on_ground():
             self.player.do_jump()
 
-    def _get_object_at_cursor(self):
+    def _get_object_at_cursor(self, distance):
         from_point = p3d.Point3()
         to_point = p3d.Point3()
+        far_point = p3d.Point3()
         base.camLens.extrude(p3d.Point2(0, 0), from_point, to_point)
+        to_point = (to_point - from_point) / base.camLens.get_far() * distance
 
         from_point = base.render.get_relative_point(base.camera, from_point)
         to_point = base.render.get_relative_point(base.camera, to_point)
@@ -91,7 +95,7 @@ class PlayerController(DirectObject):
         return base.physics_world.ray_test_closest(from_point, to_point)
 
     def fire(self):
-        result = self._get_object_at_cursor()
+        result = self._get_object_at_cursor(100)
 
         node = result.get_node()
         if (node and node.get_python_tag('character_id')):
@@ -137,7 +141,7 @@ class PlayerController(DirectObject):
 
         # Highlight buildings when in buy_mode:
         if self.in_buy_mode:
-            result = self._get_object_at_cursor().get_node()
+            result = self._get_object_at_cursor(self.BUY_DISTANCE).get_node()
             building = None
 
             if result and result.get_python_tag('building'):
