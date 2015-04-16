@@ -54,8 +54,6 @@ class DemonManager(object):
 
     def destroy(self):
         for portal in self.demon_portals:
-            for demon in portal.demons:
-                demon.destroy()
             portal.destroy()
 
     def update(self, task):
