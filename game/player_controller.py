@@ -8,6 +8,8 @@ from weapon import Weapon
 class PlayerController(DirectObject):
 
     BUY_DISTANCE = 50
+    PLAYER_WALK_SPEED = 20
+    PLAYER_SPRINT_SPEED = 50
 
     def __init__(self, player):
         DirectObject.__init__(self)
@@ -27,7 +29,7 @@ class PlayerController(DirectObject):
         self.camera_pitch = 0
 
         self.player_movement = p3d.LVector3(0, 0, 0)
-        self.player_speed = 10
+        self.player_speed = self.PLAYER_WALK_SPEED
 
         # Building acquisition
         self.in_buy_mode = False
@@ -51,6 +53,8 @@ class PlayerController(DirectObject):
         self.accept('move_right', self.update_movement, ['right', True])
         self.accept('move_right-up', self.update_movement, ['right', False])
         self.accept('jump', self.jump)
+        self.accept('sprint', lambda: setattr(self, 'player_speed', self.PLAYER_SPRINT_SPEED))
+        self.accept('sprint-up', lambda: setattr(self, 'player_speed', self.PLAYER_WALK_SPEED))
         self.accept('left_fire', self.fire, [self.left_weapon])
         self.accept('right_fire', self.fire, [self.right_weapon])
         self.accept('purchase', self.purchase_building)
