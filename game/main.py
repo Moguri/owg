@@ -125,7 +125,7 @@ class GameApp(ShowBase):
             # Write the config file to disk
             config_stream = p3d.OFileStream(config_path)
             for i in '# This file is auto-generated\n':
-                config_stream.put(ord(i))
+                config_stream.put(i)
             config_page.write(config_stream)
             config_stream.close()
         atexit.register(write_config)
