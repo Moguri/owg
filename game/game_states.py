@@ -3,6 +3,7 @@ from __future__ import print_function
 import random
 
 from direct.showbase.DirectObject import DirectObject
+from direct.gui.OnscreenText import OnscreenText
 import panda3d.core as p3d
 import panda3d.bullet as bullet
 
@@ -24,12 +25,12 @@ class MainState(DirectObject):
         player = character.Character('player')
         player.set_pos(player_spawn)
         self.player_controller = base.player_controller = PlayerController(player)
-        base.taskMgr.add(self.player_controller.update, 'Player Controller')
 
         self.demon_manager = DemonManager(city, base.physics_world)
-        base.taskMgr.add(self.demon_manager.update, 'Demon Manager')
 
         self.city_map = citygen.CityMap(city)
+
+        base.taskMgr.add(self.update, 'MainState')
 
         def toggle_map(display):
             if display:
@@ -41,8 +42,7 @@ class MainState(DirectObject):
         self.accept('display_map-up', toggle_map, [False])
 
     def destroy(self):
-        base.taskMgr.remove('Player Controller')
-        base.taskMgr.remove('Demon Manager')
+        base.taskMgr.remove('MainState')
 
         self.city_nodepath.remove_node()
 
@@ -53,6 +53,15 @@ class MainState(DirectObject):
         del base.player_controller
         self.demon_manager.destroy()
         self.ignoreAll()
+
+    def update(self, task):
+        if not self.demon_manager.demon_portals:
+            base.change_state(EndState, True)
+        else:
+            self.player_controller.update(task)
+            self.demon_manager.update(task)
+
+        return task.cont
 
     def import_city(self, city):
         building_mats = {}
@@ -96,3 +105,22 @@ class MainState(DirectObject):
         node.add_shape(bullet.BulletPlaneShape(p3d.LVector3(0, 0, 1), 0))
         self.city_nodepath.attach_new_node(node)
         base.physics_world.attach_rigid_body(node)
+
+
+class EndState(DirectObject):
+    def __init__(self, won):
+        DirectObject.__init__(self)
+
+        self.msg = OnscreenText(pos=(-0.4, 0.0), mayChange=False)
+
+        if won:
+            self.msg.setText("Congratulations, have destroyed all of the demon portals! Press enter to restart.")
+        else:
+            self.msg.setText("You have been destroyed! Press enter to restart.")
+
+        self.accept('ui_confirm', base.change_state, [MainState])
+        self.accept('left_fire', base.change_state, [MainState])
+
+    def destroy(self):
+        self.msg.destroy()
+        self.ignoreAll()

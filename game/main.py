@@ -67,17 +67,18 @@ class GameApp(ShowBase):
         self.render.set_light(light_np)
 
         self.state = MainState()
-        def restart_state():
-            self.state.destroy()
-            #print(self.render.ls())
-            #print("Num characters:", self.physics_world.get_num_characters())
-            #print("Num ghosts:", self.physics_world.get_num_ghosts())
-            #print("Num manifolds:", self.physics_world.get_num_manifolds())
-            #print("Num rigid bodies:", self.physics_world.get_num_rigid_bodies())
-            #print("Num soft bodies:", self.physics_world.get_num_soft_bodies())
-            #print("Num vehicles:", self.physics_world.get_num_vehicles())
-            self.state = MainState()
-        self.accept('restart_state', restart_state)
+        self.accept('restart_state', self.change_state, [MainState])
+
+    def change_state(self, new_state, *args):
+        self.state.destroy()
+        #print(self.render.ls())
+        #print("Num characters:", self.physics_world.get_num_characters())
+        #print("Num ghosts:", self.physics_world.get_num_ghosts())
+        #print("Num manifolds:", self.physics_world.get_num_manifolds())
+        #print("Num rigid bodies:", self.physics_world.get_num_rigid_bodies())
+        #print("Num soft bodies:", self.physics_world.get_num_soft_bodies())
+        #print("Num vehicles:", self.physics_world.get_num_vehicles())
+        self.state = new_state(*args)
 
     def setup_user_config(self):
         # TODO this should probably go in a user directory
