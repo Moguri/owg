@@ -67,6 +67,10 @@ class PlayerController(DirectObject):
         self.hud.destroy()
         self.player.destroy()
 
+    @property
+    def is_dead(self):
+        return self.player.hp <= 0
+
     def update_movement(self, direction, activate):
         move_delta = p3d.LVector3(0, 0, 0)
 

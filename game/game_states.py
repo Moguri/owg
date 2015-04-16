@@ -57,6 +57,8 @@ class MainState(DirectObject):
     def update(self, task):
         if not self.demon_manager.demon_portals:
             base.change_state(EndState, True)
+        elif self.player_controller.is_dead:
+            base.change_state(EndState, False)
         else:
             self.player_controller.update(task)
             self.demon_manager.update(task)
