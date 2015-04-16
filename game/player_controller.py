@@ -64,6 +64,7 @@ class PlayerController(DirectObject):
 
     def destroy(self):
         self.ignoreAll()
+        self.hud.destroy()
         self.player.destroy()
 
     def update_movement(self, direction, activate):
