@@ -2,7 +2,7 @@
 	"height": 1.75,
 	"name": "Demon",
 	"max_health": 1,
-	"mesh": "models/demon",
+	"mesh": "demon",
 	"radius": 0.6,
 	"use_half_height": true
 }

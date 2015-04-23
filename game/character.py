@@ -39,7 +39,7 @@ class Character(DirectObject):
 
         # Attach a mesh
         self.mesh_node = None
-        mesh = self.json_data['mesh']
+        mesh = os.path.join('models', self.json_data['mesh'])
         if mesh:
             if mesh in self.model_cache:
                 model = self.model_cache[mesh]
