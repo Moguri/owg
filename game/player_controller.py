@@ -1,4 +1,7 @@
+import math
+
 from direct.showbase.DirectObject import DirectObject
+from direct.interval.LerpInterval import LerpPosInterval
 import panda3d.core as p3d
 
 from hud import Hud
@@ -10,6 +13,10 @@ class PlayerController(DirectObject):
     BUY_DISTANCE = 50
     PLAYER_WALK_SPEED = 20
     PLAYER_SPRINT_SPEED = 50
+
+    CAMERA_DISTANCE = 6
+    CAMERA_HEIGHT = 1.25
+    CAMERA_SPRINT_SCALE = 1.2
 
     def __init__(self, player):
         DirectObject.__init__(self)
@@ -27,6 +34,16 @@ class PlayerController(DirectObject):
         self.mousey_sensitivity = my_sens_config.get_value() / 10.0
 
         self.camera_pitch = 0
+
+        base.camera.reparent_to(self.player.nodepath)
+        cam_pos = base.camera.get_pos()
+        cam_pos.z += self.CAMERA_HEIGHT
+        cam_pos.y -= self.CAMERA_DISTANCE
+        self.sprint_camera_interval = LerpPosInterval(
+            base.camera,
+            0,
+            cam_pos)
+        self.sprint_camera_interval.start()
 
         self.player_movement = p3d.LVector3(0, 0, 0)
         self.player_speed = self.PLAYER_WALK_SPEED
@@ -53,8 +70,8 @@ class PlayerController(DirectObject):
         self.accept('move_right', self.update_movement, ['right', True])
         self.accept('move_right-up', self.update_movement, ['right', False])
         self.accept('jump', self.jump)
-        self.accept('sprint', lambda: setattr(self, 'player_speed', self.PLAYER_SPRINT_SPEED))
-        self.accept('sprint-up', lambda: setattr(self, 'player_speed', self.PLAYER_WALK_SPEED))
+        self.accept('sprint', self.sprint, [True])
+        self.accept('sprint-up', self.sprint, [False])
         self.accept('left_fire', self.fire, [self.left_weapon])
         self.accept('right_fire', self.fire, [self.right_weapon])
         self.accept('purchase', self.purchase_building)
@@ -95,6 +112,29 @@ class PlayerController(DirectObject):
     def jump(self):
         if self.player.is_on_ground():
             self.player.do_jump()
+
+    def sprint(self, activate):
+        if activate:
+            self.player_speed = self.PLAYER_SPRINT_SPEED
+            cam_distance_target = -self.CAMERA_DISTANCE * self.CAMERA_SPRINT_SCALE
+        else:
+            self.player_speed = self.PLAYER_WALK_SPEED
+            cam_distance_target = -self.CAMERA_DISTANCE
+
+
+        # Move the camera smoothly
+        a = abs(cam_distance_target - base.camera.get_pos().get_y())
+        b = float(self.CAMERA_DISTANCE * self.CAMERA_SPRINT_SCALE) - self.CAMERA_DISTANCE
+        factor = a / b
+        print(base.camera.get_pos().get_y(), cam_distance_target, factor)
+        self.sprint_camera_interval.finish()
+        self.sprint_camera_interval = LerpPosInterval(
+            base.camera,
+            0.4 * factor,
+            p3d.Point3(0, cam_distance_target, self.CAMERA_HEIGHT),
+            other=self.player.nodepath
+        )
+        self.sprint_camera_interval.start()
 
     def _get_object_at_cursor(self, distance):
         from_point = p3d.Point3()
@@ -146,11 +186,6 @@ class PlayerController(DirectObject):
                 self.camera_pitch = -90
 
         # Update the camera
-        cam_pos = self.player.get_pos()
-        cam_pos.z += self.player.get_shape().get_half_height()
-        base.camera.set_pos(cam_pos)
-
-        base.camera.set_hpr(self.player.get_hpr())
         base.camera.set_p(self.camera_pitch)
 
         # Highlight buildings when in buy_mode:
