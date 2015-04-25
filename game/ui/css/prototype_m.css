@@ -1,39 +1,39 @@
 .row
 {
-	height: 100%;
+    height: 100%;
 }
 
 html
 {
-	padding: 30px;
+    padding: 30px;
 }
 
 body
 {
-	border: 3px solid black;
+    border: 3px solid black;
 }
 
 .container
 {
-	width: 100%;
-	margin-top: -50px;
-	padding-top: 50px;
+    width: 100%;
+    margin-top: -50px;
+    padding-top: 50px;
 }
 
 header
 {
-	background: green;
-	height: 50px;
+    background: green;
+    height: 50px;
 }
 
 .buildings
 {
-	height: 100%;
-	background: grey;
+    height: 100%;
+    background: grey;
 }
 
 .details
 {
-	height: 100%;
-	background: #ccc;
+    height: 100%;
+    background: #ccc;
 }
