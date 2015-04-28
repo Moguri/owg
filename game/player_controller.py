@@ -33,16 +33,21 @@ class PlayerController(DirectObject):
         my_sens_config = p3d.ConfigVariableInt('mousey-sensitivity')
         self.mousey_sensitivity = my_sens_config.get_value() / 10.0
 
+        # Camera setup
         self.camera_pitch = 0
 
-        base.camera.reparent_to(self.player.nodepath)
-        cam_pos = base.camera.get_pos()
-        cam_pos.z += self.CAMERA_HEIGHT
-        cam_pos.y -= self.CAMERA_DISTANCE
+        self.camera_pivot = self.player.nodepath.attach_new_node('camera_pivot')
+        pos = self.camera_pivot.get_pos()
+        pos.z += self.CAMERA_HEIGHT
+        self.camera_pivot.set_pos(pos)
+
+        base.camera.reparent_to(self.camera_pivot)
+        pos = base.camera.get_pos()
+        pos.y -= self.CAMERA_DISTANCE
         self.sprint_camera_interval = LerpPosInterval(
             base.camera,
             0,
-            cam_pos)
+            pos)
         self.sprint_camera_interval.start()
 
         self.player_movement = p3d.LVector3(0, 0, 0)
@@ -186,7 +191,7 @@ class PlayerController(DirectObject):
                 self.camera_pitch = -90
 
         # Update the camera
-        base.camera.set_p(self.camera_pitch)
+        self.camera_pivot.set_p(self.camera_pitch)
 
         # Highlight buildings when in buy_mode:
         if self.in_buy_mode:
