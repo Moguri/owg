@@ -1,7 +1,11 @@
 #!/usr/bin/env python2
 from __future__ import print_function
 
+# Keep this cefpanda import at the top
+#from cefpanda import CEFPanda
+
 import os
+import sys
 import atexit
 
 import direct.gui as dgui
@@ -33,6 +37,14 @@ class GameApp(ShowBase):
         win_size = [win_size_config.get_int_word(0), win_size_config.get_int_word(1)]
         wp.set_size(*win_size)
         self.openDefaultWindow(props=wp)
+
+        # Handle exiting if the window closes (helps CEFPanda)
+        self.win.set_close_request_event('quit')
+        self.accept('quit', sys.exit)
+
+        # Setup UI
+        #self.ui = CEFPanda()
+        #self.ui.load('ui/template.html')
 
         # Don't send compound events with modifiers (e.g., send 'shift' and 'a' instead of 'shift-a')
         self.mouseWatcherNode.set_modifier_buttons(p3d.ModifierButtons())
