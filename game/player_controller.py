@@ -8,6 +8,10 @@ from hud import Hud
 from weapon import Weapon
 
 
+def clamp(value, lower, upper):
+    return max(min(value, upper), lower)
+
+
 class PlayerController(DirectObject):
 
     BUY_DISTANCE = 50
@@ -35,8 +39,9 @@ class PlayerController(DirectObject):
 
         # Camera setup
         self.camera_pitch = 0
+        self.camera_heading = 0
 
-        self.camera_pivot = self.player.nodepath.attach_new_node('camera_pivot')
+        self.camera_pivot = base.render.attach_new_node('camera_pivot')
         pos = self.camera_pivot.get_pos()
         pos.z += self.CAMERA_HEIGHT
         self.camera_pivot.set_pos(pos)
@@ -173,8 +178,13 @@ class PlayerController(DirectObject):
         # Update movement
         movement = p3d.LVector3(self.player_movement)
         movement.normalize()
+        movement = base.camera.getMat(base.render).xformVec(movement)
         movement *= self.player_speed
-        self.player.set_linear_movement(movement)
+        self.player.set_linear_movement(movement, local=False)
+
+        if movement.length() != 0.0:
+            heading = -math.atan2(movement.x, movement.y)
+            self.player.nodepath.set_h(math.degrees(heading))
 
         # Mouse movement
         if base.mouseWatcherNode.has_mouse():
@@ -182,16 +192,19 @@ class PlayerController(DirectObject):
             halfx = base.win.get_x_size() / 2
             halfy = base.win.get_y_size() / 2
             base.win.move_pointer(0, halfx, halfy)
-            self.player.set_angular_movement(-mouse.x * self.mousex_sensitivity)
+            #self.player.set_angular_movement(-mouse.x * self.mousex_sensitivity)
 
             self.camera_pitch += mouse.y * self.mousey_sensitivity
-            if self.camera_pitch > 90:
-                self.camera_pitch = 90
-            elif self.camera_pitch < -90:
-                self.camera_pitch = -90
+            self.camera_pitch = clamp(self.camera_pitch, -90, 90)
+
+            self.camera_heading += -mouse.x * self.mousex_sensitivity * 0.025
 
         # Update the camera
         self.camera_pivot.set_p(self.camera_pitch)
+        self.camera_pivot.set_h(self.camera_heading)
+        pos = self.player.nodepath.get_pos()
+        pos[2] += self.CAMERA_HEIGHT
+        self.camera_pivot.set_pos(pos)
 
         # Highlight buildings when in buy_mode:
         if self.in_buy_mode:
