@@ -2,7 +2,7 @@
 	"height": 1.75,
 	"name": "Player",
 	"max_health": 5,
-	"mesh": "demon",
+	"mesh": "player",
 	"radius": 0.6,
 	"use_half_height": true
 }
