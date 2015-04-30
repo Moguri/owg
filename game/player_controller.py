@@ -209,7 +209,6 @@ class PlayerController(DirectObject):
         pos = self.player.nodepath.get_pos()
         pos[2] += self.CAMERA_HEIGHT
         pos_delta = pos - self.camera_pivot.get_pos()
-        print(pos_delta.length())
         self.camera_pivot.set_pos(self.camera_pivot.get_pos() + pos_delta * 0.25)
 
         # Highlight buildings when in buy_mode:
