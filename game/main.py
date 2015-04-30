@@ -30,6 +30,8 @@ class GameApp(ShowBase):
         self.input_mapper = inputmapper.InputMapper(os.path.join(self.app_dir, 'input.conf'))
         self.disableMouse()
 
+        base.render.set_antialias(p3d.AntialiasAttrib.M_multisample)
+
         wp = p3d.WindowProperties()
         wp.set_cursor_hidden(True)
         wp.set_mouse_mode(p3d.WindowProperties.MRelative)
@@ -107,6 +109,8 @@ class GameApp(ShowBase):
         defaults = {
                 'win-size': '{} {}'.format(*win_size),
                 'fullscreen': '#t',
+                'framebuffer-multisample': '1',
+                'multisamples': '4',
                 'mousex-sensitivity': '100',
                 'mousey-sensitivity': '100',
         }
