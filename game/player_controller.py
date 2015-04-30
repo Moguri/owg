@@ -131,20 +131,19 @@ class PlayerController(DirectObject):
             self.player_speed = self.PLAYER_WALK_SPEED
             cam_distance_target = -self.CAMERA_DISTANCE
 
-
         # Move the camera smoothly
-        a = abs(cam_distance_target - base.camera.get_pos().get_y())
-        b = float(self.CAMERA_DISTANCE * self.CAMERA_SPRINT_SCALE) - self.CAMERA_DISTANCE
-        factor = a / b
-        print(base.camera.get_pos().get_y(), cam_distance_target, factor)
-        self.sprint_camera_interval.finish()
-        self.sprint_camera_interval = LerpPosInterval(
-            base.camera,
-            0.4 * factor,
-            p3d.Point3(0, cam_distance_target, self.CAMERA_HEIGHT),
-            other=self.player.nodepath
-        )
-        self.sprint_camera_interval.start()
+        # a = abs(cam_distance_target - base.camera.get_pos().get_y())
+        # b = float(self.CAMERA_DISTANCE * self.CAMERA_SPRINT_SCALE) - self.CAMERA_DISTANCE
+        # factor = a / b
+        # print(base.camera.get_pos().get_y(), cam_distance_target, factor)
+        # self.sprint_camera_interval.finish()
+        # self.sprint_camera_interval = LerpPosInterval(
+        # 	base.camera,
+        # 	0.4 * factor,
+        # 	p3d.Point3(0, cam_distance_target, self.CAMERA_HEIGHT),
+        # 	other=self.player.nodepath
+        # )
+        # self.sprint_camera_interval.start()
 
     def _get_object_at_cursor(self, distance):
         from_point = p3d.Point3()
@@ -182,9 +181,14 @@ class PlayerController(DirectObject):
         movement *= self.player_speed
         self.player.set_linear_movement(movement, local=False)
 
-        if movement.length() != 0.0:
-            heading = -math.atan2(movement.x, movement.y)
-            self.player.nodepath.set_h(math.degrees(heading))
+        # if movement.length() != 0.0:
+            # desired_heading = -math.degrees(math.atan2(movement.x, movement.y))
+        cam_vec = base.camera.getMat(base.render).xformVec(p3d.LVector3f(0, 1, 0))
+        desired_heading = -math.degrees(math.atan2(cam_vec.x, cam_vec.y))
+        current_heading = self.player.nodepath.get_h()
+        alpha = ((desired_heading-current_heading) + 180) % 360 - 180
+        heading = current_heading + alpha * 0.25
+        self.player.nodepath.set_h(heading)
 
         # Mouse movement
         if base.mouseWatcherNode.has_mouse():
@@ -204,7 +208,9 @@ class PlayerController(DirectObject):
         self.camera_pivot.set_h(self.camera_heading)
         pos = self.player.nodepath.get_pos()
         pos[2] += self.CAMERA_HEIGHT
-        self.camera_pivot.set_pos(pos)
+        pos_delta = pos - self.camera_pivot.get_pos()
+        print(pos_delta.length())
+        self.camera_pivot.set_pos(self.camera_pivot.get_pos() + pos_delta * 0.25)
 
         # Highlight buildings when in buy_mode:
         if self.in_buy_mode:
