@@ -48,11 +48,11 @@ class Character(DirectObject):
                 self.model_cache[mesh] = model
 
             self.mesh_node = model.instance_under_node(self.nodepath, 'mesh')
+            bounds = model.get_tight_bounds()
+            self.half_height = (bounds[1] - bounds[0]).z / 2.0
             if self.json_data['use_half_height']:
-                bounds = model.get_tight_bounds()
-                half_height = (bounds[1] - bounds[0]).z / 2.0
                 pos = self.mesh_node.get_pos()
-                pos.z -= half_height
+                pos.z -= self.half_height
                 self.mesh_node.set_pos(pos)
 
         self.accept('character_hit', self.on_hit)

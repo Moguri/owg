@@ -150,17 +150,33 @@ class PlayerController(DirectObject):
         to_point = p3d.Point3()
         far_point = p3d.Point3()
         base.camLens.extrude(p3d.Point2(0, 0), from_point, to_point)
-        to_point = (to_point - from_point) / base.camLens.get_far() * distance
 
-        from_point = base.render.get_relative_point(base.camera, from_point)
+        from_point = self.player.get_pos()
+        from_point.z += self.player.half_height * 0.5
         to_point = base.render.get_relative_point(base.camera, to_point)
+        to_point -= from_point
+        to_point.normalize()
+        to_point *= distance
+        to_point += from_point
 
-        return base.physics_world.ray_test_closest(from_point, to_point)
+        result = base.physics_world.ray_test_closest(from_point, to_point)
+
+        # Draw debug lines
+        #lineseg = p3d.LineSegs('debug ray')
+        #lineseg.reset()
+        #lineseg.move_to(from_point)
+        #lineseg.draw_to(to_point)
+        #debug_line = lineseg.create(False)
+        #base.render.attach_new_node(debug_line)
+
+        if result.has_hit():
+            return result.get_node()
+        else:
+            return None
 
     def fire(self, weapon):
-        result = self._get_object_at_cursor(weapon.range)
+        node = self._get_object_at_cursor(weapon.range)
 
-        node = result.get_node()
         if (node and node.get_python_tag('character_id')):
             cid = node.get_python_tag('character_id')
             base.messenger.send('character_hit', [cid])
@@ -213,7 +229,7 @@ class PlayerController(DirectObject):
 
         # Highlight buildings when in buy_mode:
         if self.in_buy_mode:
-            result = self._get_object_at_cursor(self.BUY_DISTANCE).get_node()
+            result = self._get_object_at_cursor(self.BUY_DISTANCE)
             building = None
 
             if result and result.get_python_tag('building'):
