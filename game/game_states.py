@@ -11,6 +11,8 @@ import citygen
 import character
 from player_controller import PlayerController
 from demon_manager import DemonManager
+from world_manager import WorldData, WorldManager
+
 
 class MainState(DirectObject):
     def __init__(self):
@@ -18,8 +20,17 @@ class MainState(DirectObject):
         gen.generate()
         city = gen.city
 
-        self.city_nodepath = base.render.attach_new_node("City")
-        self.import_city(city)
+        self.world_manager = WorldManager(base.render)
+        world = WorldData("City")
+        self.import_city(world, city)
+        self.world_id = self.world_manager.add_world(world)
+        self.world_manager.show_world(self.world_id)
+
+        node = bullet.BulletRigidBodyNode('Ground')
+        node.add_shape(bullet.BulletPlaneShape(p3d.LVector3(0, 0, 1), 0))
+        base.render.attach_new_node(node)
+        base.physics_world.attach_rigid_body(node)
+
         player_spawn = random.choice(city.spawn_points)
 
         player = character.Character('player')
@@ -44,7 +55,7 @@ class MainState(DirectObject):
     def destroy(self):
         base.taskMgr.remove('MainState')
 
-        self.city_nodepath.remove_node()
+        self.world_manager.destroy()
 
         for body in base.physics_world.get_rigid_bodies():
             base.physics_world.remove(body)
@@ -65,7 +76,7 @@ class MainState(DirectObject):
 
         return task.cont
 
-    def import_city(self, city):
+    def import_city(self, world_data, city):
         building_mats = {}
         for resource, data in citygen.RESOURCES.items():
             mat_set = []
@@ -82,7 +93,7 @@ class MainState(DirectObject):
             name = str(i)
             mat = random.choice(building_mats[building.resource])
             node = citygen.mesh_to_p3d_node(mesh, name, mat)
-            np = self.city_nodepath.attach_new_node(node)
+            np = world_data.nodepath.attach_new_node(node)
             np.set_pos(p3d.VBase3(*building.position))
             building.nodepath = np
 
@@ -90,23 +101,18 @@ class MainState(DirectObject):
             node.add_shape(bullet.BulletBoxShape(p3d.LVector3(building.collision)))
             if building.resource != "NONE":
                 node.set_python_tag('building', building)
-            np = self.city_nodepath.attach_new_node(node)
+            np = world_data.nodepath.attach_new_node(node)
             pos = list(building.position)
             pos[2] += building.collision[2]
             np.set_pos(p3d.VBase3(*pos))
-            base.physics_world.attach_rigid_body(node)
+            world_data.physics_world.attach_rigid_body(node)
 
         road_mat = p3d.Material()
         road_mat.set_shininess(1.0)
         color = [c/255.0 for c in (7, 105, 105)]
         road_mat.set_diffuse(p3d.VBase4(color[0], color[1], color[2], 1.0))
         node = citygen.mesh_to_p3d_node(city.road_mesh, "road", road_mat)
-        self.city_nodepath.attach_new_node(node)
-
-        node = bullet.BulletRigidBodyNode('Ground')
-        node.add_shape(bullet.BulletPlaneShape(p3d.LVector3(0, 0, 1), 0))
-        self.city_nodepath.attach_new_node(node)
-        base.physics_world.attach_rigid_body(node)
+        world_data.nodepath.attach_new_node(node)
 
 
 class EndState(DirectObject):
