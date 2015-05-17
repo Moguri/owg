@@ -194,6 +194,8 @@ class PlayerController(DirectObject):
         movement = p3d.LVector3(self.player_movement)
         movement.normalize()
         movement = base.camera.getMat(base.render).xformVec(movement)
+        movement[2] = 0
+        movement.normalize()
         movement *= self.player_speed
         self.player.set_linear_movement(movement, local=False)
 
@@ -215,7 +217,7 @@ class PlayerController(DirectObject):
             #self.player.set_angular_movement(-mouse.x * self.mousex_sensitivity)
 
             self.camera_pitch += mouse.y * self.mousey_sensitivity
-            self.camera_pitch = clamp(self.camera_pitch, -90, 90)
+            self.camera_pitch = clamp(self.camera_pitch, -75, 75)
 
             self.camera_heading += -mouse.x * self.mousex_sensitivity * 0.025
 
