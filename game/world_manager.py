@@ -18,6 +18,12 @@ class WorldData(object):
         self.camera.node().set_lens(base.camLens)
         self.camera.reparent_to(self.nodepath)
 
+        self.active = False
+
+    def activate(self):
+        self.active = self.nodepath.get_parent().is_empty()
+        self._texbuffer.set_active(self.active)
+
     def destroy(self):
         base.graphicsEngine.remove_window(self._texbuffer)
         self.nodepath.remove_node()
@@ -69,6 +75,7 @@ class WorldManager(object):
         main_xform = base.camera.get_net_transform()
 
         for world in self._worlds:
+            world.activate()
             world.camera.set_transform(main_xform)
             world.physics_world.do_physics(dt)
 
