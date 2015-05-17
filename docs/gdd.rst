@@ -188,4 +188,10 @@ Additional Ideas and Possibilities
 * Randomly generate cities
 * Add flying vehicles
 * More parkour-style movement options
+* Expansion to sewers and rooftops
+
+Gameplay Insights
+=================
+
+* Action is at street level
 
