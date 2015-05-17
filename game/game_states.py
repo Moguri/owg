@@ -17,14 +17,21 @@ from world_manager import WorldData, WorldManager
 class MainState(DirectObject):
     def __init__(self):
         gen = citygen.CityGen()
-        gen.generate()
-        city = gen.city
 
         self.world_manager = WorldManager(base.render)
-        world = WorldData("City")
-        self.import_city(world, city)
-        self.world_id = self.world_manager.add_world(world)
-        self.world_manager.show_world(self.world_id)
+
+        world_ids = []
+        for i in range(1,6):
+            world = WorldData("City" + str(i))
+            gen.generate()
+            city = gen.city
+            self.import_city(world, city)
+            wid = self.world_manager.add_world(world)
+            key = str.format('world_{}-up', i)
+            self.accept(key, self.world_manager.switch_world, [wid])
+            world_ids.append(wid)
+
+        self.world_manager.show_world(world_ids[0])
 
         node = bullet.BulletRigidBodyNode('Ground')
         node.add_shape(bullet.BulletPlaneShape(p3d.LVector3(0, 0, 1), 0))

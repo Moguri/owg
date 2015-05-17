@@ -30,9 +30,17 @@ class WorldManager(object):
         self._worlds.append(world_data)
         return world_data.id
 
+    def switch_world(self, wid):
+        self.hide_all_worlds()
+        self.show_world(wid)
+
     def show_world(self, wid):
         world = self.get_world(wid)
         world.nodepath.reparent_to(self.nodepath)
+
+    def hide_all_worlds(self):
+        for world in self._worlds:
+            world.nodepath.detachNode()
 
     def hide_world(self, wid):
         world = self.get_world(wid)
