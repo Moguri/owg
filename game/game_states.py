@@ -121,6 +121,7 @@ class MainState(DirectObject):
         road_mat.set_diffuse(p3d.VBase4(color[0], color[1], color[2], 1.0))
         node = citygen.mesh_to_p3d_node(city.road_mesh, "road", road_mat)
         world_data.nodepath.attach_new_node(node)
+        world_data.nodepath.flatten_strong()
 
         node = bullet.BulletRigidBodyNode('Ground')
         node.add_shape(bullet.BulletPlaneShape(p3d.LVector3(0, 0, 1), 0))
