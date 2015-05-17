@@ -12,10 +12,12 @@ class Character(DirectObject):
     next_id = 1
     model_cache = {}
 
-    def __init__(self, cfile, root=None):
+    def __init__(self, cfile, root=None, world_manager=None):
         self.id = Character.next_id
         Character.next_id += 1
         self.linear_movement = p3d.LVector3(0.0)
+
+        self.world_manager = world_manager
 
         if root is None:
             root = base.render
@@ -31,7 +33,10 @@ class Character(DirectObject):
         # Setup physics
         shape = BulletCapsuleShape(radius, height - 2 * radius, ZUp)
         self.physics_node = BulletCharacterControllerNode(shape, radius, name)
-        base.physics_world.attach_character(self.physics_node)
+        if self.world_manager is None:
+            base.physics_world.attach_character(self.physics_node)
+        else:
+            self.world_manager.switch_node_physics(self.physics_node, 0)
         self.physics_node.setPythonTag('character_id', self.id)
 
         # Attach to the scenegraph
@@ -57,8 +62,14 @@ class Character(DirectObject):
 
         self.accept('character_hit', self.on_hit)
 
+        if self.world_manager:
+            for i in range(1, 6):
+                key = str.format('world_{}-up', i)
+                self.accept(key, self.world_manager.switch_node_physics, [self.physics_node, i-1])
+
     def destroy(self):
-        base.physics_world.remove_character(self.physics_node)
+        if self.world_manager is None:
+            base.physics_world.remove_character(self.physics_node)
         self.nodepath.remove_node()
         self.ignoreAll()
 

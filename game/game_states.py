@@ -21,7 +21,7 @@ class MainState(DirectObject):
         self.world_manager = WorldManager(base.render)
 
         world_ids = []
-        for i in range(1,6):
+        for i in range(1, 6):
             world = WorldData("City" + str(i))
             gen.generate()
             city = gen.city
@@ -40,7 +40,7 @@ class MainState(DirectObject):
 
         player_spawn = random.choice(city.spawn_points)
 
-        player = character.Character('player')
+        player = character.Character('player', world_manager=self.world_manager)
         player.set_pos(player_spawn)
         self.player_controller = base.player_controller = PlayerController(player)
 
@@ -121,6 +121,11 @@ class MainState(DirectObject):
         road_mat.set_diffuse(p3d.VBase4(color[0], color[1], color[2], 1.0))
         node = citygen.mesh_to_p3d_node(city.road_mesh, "road", road_mat)
         world_data.nodepath.attach_new_node(node)
+
+        node = bullet.BulletRigidBodyNode('Ground')
+        node.add_shape(bullet.BulletPlaneShape(p3d.LVector3(0, 0, 1), 0))
+        world_data.nodepath.attach_new_node(node)
+        world_data.physics_world.attach_rigid_body(node)
 
 
 class EndState(DirectObject):

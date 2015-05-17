@@ -42,6 +42,12 @@ class WorldManager(object):
         self._worlds.append(world_data)
         return world_data.id
 
+    def switch_node_physics(self, phys_node, wid):
+        for world in self._worlds:
+            world.physics_world.remove(phys_node)
+
+        self.get_world(wid).physics_world.attach(phys_node)
+
     def switch_world(self, wid):
         self.hide_all_worlds()
         self.show_world(wid)
@@ -59,8 +65,10 @@ class WorldManager(object):
         world.nodepath.detachNode()
 
     def update(self):
+        dt = globalClock.getDt()
         main_xform = base.camera.get_net_transform()
 
         for world in self._worlds:
             world.camera.set_transform(main_xform)
+            world.physics_world.do_physics(dt)
 
