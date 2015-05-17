@@ -1,4 +1,5 @@
 import ctypes
+import math
 import random
 from data import *
 
@@ -75,6 +76,7 @@ def gen_city(city_width=500, city_height=500, lane_width=6, block_width=80, bloc
     y_off = city_height / 2.0
 
     # Roads
+    random.seed(42)
     vert_roads = []
     vert_progress = 0
     while True:
@@ -99,6 +101,7 @@ def gen_city(city_width=500, city_height=500, lane_width=6, block_width=80, bloc
     y_offset = (city_height - vert_progress) / 2.0
 
     # Blocks
+    random.seed()
     blocks = []
     road_verts = []
     road_faces = []
@@ -148,7 +151,7 @@ def gen_city(city_width=500, city_height=500, lane_width=6, block_width=80, bloc
     # Buildings
     resource_choices = [(key, value.weight) for key, value in RESOURCES.items()]
     for lot in lots:
-        floors = random.randint(1, 5)
+        floors = int(math.ceil(random.betavariate(2, 2) * 8))
         height = floors * 4
 
         verts = []
