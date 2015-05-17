@@ -78,6 +78,7 @@ class MainState(DirectObject):
         elif self.player_controller.is_dead:
             base.change_state(EndState, False)
         else:
+            self.world_manager.update()
             self.player_controller.update(task)
             self.demon_manager.update(task)
 

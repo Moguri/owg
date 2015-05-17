@@ -7,8 +7,20 @@ class WorldData(object):
         self.id = -1
         self.name = name
         self.nodepath = p3d.NodePath(p3d.PandaNode(name))
+        self.nodepath.set_state(base.render.get_state())
         self.physics_world = bullet.BulletWorld()
 
+        sx = base.win.get_x_size()
+        sy = base.win.get_y_size()
+        self._texbuffer = base.win.make_texture_buffer(self.name + "Buffer", sx, sy)
+        self._texbuffer.set_sort(-1)
+        self.camera = base.makeCamera(self._texbuffer)
+        self.camera.node().set_lens(base.camLens)
+        self.camera.reparent_to(self.nodepath)
+
+    def destroy(self):
+        base.graphicsEngine.remove_window(self._texbuffer)
+        self.nodepath.remove_node()
 
 class WorldManager(object):
     def __init__(self, nodepath):
@@ -19,7 +31,7 @@ class WorldManager(object):
 
     def destroy(self):
         for world in self._worlds:
-            world.nodepath.remove_node()
+            world.destroy()
 
     def get_world(self, wid):
         return [world for world in self._worlds if world.id == wid][0]
@@ -45,3 +57,10 @@ class WorldManager(object):
     def hide_world(self, wid):
         world = self.get_world(wid)
         world.nodepath.detachNode()
+
+    def update(self):
+        main_xform = base.camera.get_net_transform()
+
+        for world in self._worlds:
+            world.camera.set_transform(main_xform)
+
