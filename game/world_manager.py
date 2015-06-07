@@ -1,10 +1,12 @@
 import panda3d.core as p3d
 import panda3d.bullet as bullet
 
+from direct.filter.FilterManager import FilterManager
+
 
 class WorldData(object):
-    def __init__(self, name):
-        self.id = -1
+    def __init__(self, world_id, name):
+        self.id = world_id
         self.name = name
         self.nodepath = p3d.NodePath(p3d.PandaNode(name))
         self.nodepath.set_state(base.render.get_state())
@@ -21,7 +23,7 @@ class WorldData(object):
         self.active = False
 
     def activate(self):
-        self.active = self.nodepath.get_parent().is_empty()
+        self.active = True #self.nodepath.get_parent().is_empty()
         self._texbuffer.set_active(self.active)
 
     def destroy(self):
@@ -33,20 +35,32 @@ class WorldManager(object):
         self.nodepath = nodepath
 
         self._worlds = []
-        self._id_counter = 0
+        self._active_world = 0
+        self.do_compositing = False
+
+        # Setup post-process portal compositing
+        self._manager = FilterManager(base.win, base.cam)
+        self._texture = p3d.Texture()
+        self._dtexture = p3d.Texture()
+        self._quad = self._manager.renderSceneInto(colortex=self._texture, depthtex=self._dtexture)
+        self._quad = self._manager.renderSceneInto(colortex=self._texture)
+        self._quad.set_shader(p3d.Shader.load(p3d.Shader.SL_GLSL, "portal.vs", "portal.fs"))
+        self._quad.set_shader_input("main_texture", self._texture)
 
     def destroy(self):
         for world in self._worlds:
             world.destroy()
+        self._manager.cleanup()
 
     def get_world(self, wid):
         return [world for world in self._worlds if world.id == wid][0]
 
-    def add_world(self, world_data):
-        world_data.id = self._id_counter
-        self._id_counter += 1
+    def add_world(self, name):
+        world_data = WorldData(len(self._worlds), name)
         self._worlds.append(world_data)
-        return world_data.id
+        self._quad.set_shader_input("world_texture_{}".format(world_data.id), world_data._texbuffer.get_texture(0))
+        self._quad.set_shader_input("num_worlds", len(self._worlds))
+        return world_data
 
     def switch_node_physics(self, phys_node, wid):
         for world in self._worlds:
@@ -57,10 +71,14 @@ class WorldManager(object):
     def switch_world(self, wid):
         self.hide_all_worlds()
         self.show_world(wid)
+        self._active_world = wid
+        self._quad.set_shader_input("active_world", wid)
 
     def show_world(self, wid):
         world = self.get_world(wid)
         world.nodepath.reparent_to(self.nodepath)
+        self._active_world = wid
+        self._quad.set_shader_input("active_world", wid)
 
     def hide_all_worlds(self):
         for world in self._worlds:
@@ -73,6 +91,8 @@ class WorldManager(object):
     def update(self):
         dt = globalClock.getDt()
         main_xform = base.camera.get_net_transform()
+
+        self._quad.set_shader_input("do_compositing", self.do_compositing)
 
         for world in self._worlds:
             world.activate()

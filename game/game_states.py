@@ -22,11 +22,11 @@ class MainState(DirectObject):
 
         world_ids = []
         for i in range(1, 6):
-            world = WorldData("City" + str(i))
+            world = self.world_manager.add_world("City" + str(i))
             gen.generate()
             city = gen.city
             self.import_city(world, city)
-            wid = self.world_manager.add_world(world)
+            wid = world.id
             key = str.format('world_{}-up', i)
             self.accept(key, self.world_manager.switch_world, [wid])
             world_ids.append(wid)
@@ -58,6 +58,10 @@ class MainState(DirectObject):
 
         self.accept('display_map', toggle_map, [True])
         self.accept('display_map-up', toggle_map, [False])
+
+        def toggle_compositing():
+            self.world_manager.do_compositing = not self.world_manager.do_compositing
+        self.accept('toggle_compositing', toggle_compositing)
 
     def destroy(self):
         base.taskMgr.remove('MainState')

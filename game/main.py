@@ -44,6 +44,9 @@ class GameApp(ShowBase):
         self.win.set_close_request_event('quit')
         self.accept('quit', sys.exit)
 
+        #p3d.PStatClient.connect()
+        #self.bufferViewer.enable(True)
+
         # Setup UI
         #self.ui = CEFPanda()
         #self.ui.load('ui/template.html')
