@@ -30,6 +30,14 @@ class WorldData(object):
         base.graphicsEngine.remove_window(self._texbuffer)
         self.nodepath.remove_node()
 
+    def setup_fog(self, fog_color, fog_exp):
+        fog = p3d.Fog("World {} Fog".format(self.id))
+        fog.set_color(fog_color)
+        fog.set_exp_density(fog_exp)
+        self.nodepath.set_fog(fog)
+        self._texbuffer.set_clear_color(fog_color)
+
+
 class WorldManager(object):
     def __init__(self, nodepath):
         self.nodepath = nodepath

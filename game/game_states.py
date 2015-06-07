@@ -23,6 +23,8 @@ class MainState(DirectObject):
         world_ids = []
         for i in range(1, 6):
             world = self.world_manager.add_world("City" + str(i))
+            if i != 1:
+                world.setup_fog(p3d.LVector3(0.6, 0.1, 0.0), 0.02)
             gen.generate()
             city = gen.city
             self.import_city(world, city)
